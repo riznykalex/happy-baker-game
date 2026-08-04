@@ -745,16 +745,20 @@ class GameScene extends Phaser.Scene {
         else spawnType = TILE.CROISSANT;
       } else if (type === TILE.CROISSANT) {
         if (size >= 4) {
-          spawnType = TILE.CAKE;
-          cakesGained = 1;
+          cakesGained = 1; // торт не лишається на полі — одразу летить на лічильник
         } else {
           spawnType = TILE.CUPCAKE;
         }
       } else if (type === TILE.CUPCAKE) {
-        spawnType = TILE.CAKE;
-        cakesGained = 1;
+        cakesGained = 1; // торт не лишається на полі — одразу летить на лічильник
       } else if (type === TILE.CAKE) {
         cakesGained = size;
+      } else if (type === TILE.STRAWBERRY) {
+        spawnType = TILE.BLUEBERRY; // 3+ полуниці → лохина на полі
+        special = 'berry_convert';
+      } else if (type === TILE.BLUEBERRY) {
+        spawnType = TILE.STRAWBERRY; // 3+ лохини → полуниця на полі
+        special = 'berry_convert';
       } else if (type === TILE.ROLLINGPIN && size >= 3) {
         convertFlourToCookie = true;
         special = 'rollingpin_convert';
@@ -764,8 +768,11 @@ class GameScene extends Phaser.Scene {
       }
 
       if (cakesGained > 0) {
-        this.cakesCollected += cakesGained;
-        this.onCakeGained(cakesGained);
+        const mid = group[Math.floor(group.length / 2)];
+        this.gainCakes(cakesGained, {
+          x: BOARD_OFFSET_X + mid.c * TILE_SIZE + TILE_SIZE / 2,
+          y: BOARD_OFFSET_Y + mid.r * TILE_SIZE + TILE_SIZE / 2
+        });
       }
 
       this.matchCount++;
@@ -1091,18 +1098,20 @@ class GameScene extends Phaser.Scene {
       this.autoReshuffle();
       this.showToast('🦊 Поле перемішано з бонусом!');
     } else if (key === 'dragon') {
-      // Find a cupcake and turn to cake
+      // Капкейк → торт одразу на лічильник (на полі не лишається)
       let found = false;
       for (let r = 0; r < GRID_SIZE && !found; r++) {
         for (let c = 0; c < GRID_SIZE && !found; c++) {
           if (this.grid[r][c] === TILE.CUPCAKE) {
-            this.grid[r][c] = TILE.CAKE;
-            this.cakesCollected++;
-            this.updateTargetUI();
-            this.onCakeGained(1);
-            this.drawGrid();
+            const pos = {
+              x: BOARD_OFFSET_X + c * TILE_SIZE + TILE_SIZE / 2,
+              y: BOARD_OFFSET_Y + r * TILE_SIZE + TILE_SIZE / 2
+            };
+            this.grid[r][c] = TILE.EMPTY;
             found = true;
             this.showToast('🐉 Капкейк → Торт!');
+            this.applyGravity();
+            this.gainCakes(1, pos);
           }
         }
       }
@@ -1195,6 +1204,33 @@ class GameScene extends Phaser.Scene {
       resetTo: this.timer
     });
     this.showToast('⏱ Час оновлено!');
+  }
+
+  /** Торт не лишається на полі — одразу летить на лічильник тортів */
+  gainCakes(count, source) {
+    this.cakesCollected += count;
+    const target = this.targetText;
+    const { width, height } = this.cameras.main;
+    const fromX = source ? source.x : width / 2;
+    const fromY = source ? source.y : height / 2 - 40;
+    for (let i = 0; i < count; i++) {
+      const cake = this.add.image(fromX, fromY, 'cake')
+        .setScale(0.5).setDepth(25).setAlpha(0.9);
+      this.tweens.add({
+        targets: cake,
+        x: target.x,
+        y: target.y + 20,
+        scale: 0.14,
+        alpha: 0.4,
+        delay: i * 150,
+        duration: 700,
+        ease: 'Sine.easeIn',
+        onComplete: () => cake.destroy()
+      });
+    }
+    this.updateTargetUI();
+    this.onCakeGained(count);
+    this.tweens.add({ targets: target, scale: 1.3, duration: 120, yoyo: true });
   }
 
   // ──────────────────────────────────────────────
