@@ -16,7 +16,8 @@
       "milk": 3,
       "butter": 5,
       "berries": 5
-    }
+    },
+    "tools": []
   },
   {
     "level": 2,
@@ -33,6 +34,7 @@
       "fox",
       "dragon"
     ],
+    "tools": ["rollingpin"],
     "description": "Ранкові гості: зберіть молоко і борошно. Ягоди дають бонус часу"
   },
   {
@@ -46,6 +48,7 @@
       "fox",
       "dragon"
     ],
+    "tools": ["spatula"],
     "description": "Кухонна халепа: приберіть 4 пригорілих печива"
   },
   {
@@ -59,6 +62,7 @@
       "fox",
       "dragon"
     ],
+    "tools": ["rollingpin", "spatula"],
     "description": "Еспресо-спринт: 8 чашок кави. Лохина рятує час!"
   },
   {
@@ -75,6 +79,7 @@
       "fox",
       "dragon"
     ],
+    "tools": ["rollingpin", "spatula"],
     "description": "Весільний заказ: зберіть 3 капкейки в один торт. Масло — секрет ніжності"
   },
   {
@@ -92,6 +97,7 @@
       "fox",
       "dragon"
     ],
+    "tools": ["rollingpin", "spatula"],
     "description": "День смаколиків для звірят: спеції, борошно і ягідний декор"
   },
   {
@@ -109,6 +115,7 @@
       "fox",
       "dragon"
     ],
+    "tools": ["rollingpin", "spatula"],
     "description": "Фестиваль десертів: 3 торти + 8 капкейків"
   },
   {
@@ -122,6 +129,7 @@
       "fox",
       "dragon"
     ],
+    "tools": ["rollingpin", "spatula"],
     "description": "Нічна зміна: 6 пригорілих. Сова заморозить час"
   },
   {
@@ -135,6 +143,7 @@
       "fox",
       "dragon"
     ],
+    "tools": ["rollingpin", "spatula"],
     "description": "VIP: особливе комбо з масла, лохини та полуниці"
   },
   {
@@ -148,6 +157,7 @@
       "fox",
       "dragon"
     ],
+    "tools": ["rollingpin", "spatula"],
     "description": "Королівський банкет: гігантський торт з усіх інгредієнтів"
   }
 ]

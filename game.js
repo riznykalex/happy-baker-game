@@ -8,9 +8,9 @@ const GRID_SIZE = 7;
 const BOARD_W = GRID_SIZE * TILE_SIZE; // 896
 const BOARD_H = GRID_SIZE * TILE_SIZE; // 896
 const BOARD_OFFSET_X = 32;
-const BOARD_OFFSET_Y = 160;     // місце під великий HUD зверху
+const BOARD_OFFSET_Y = 176;     // місце під великий HUD зверху
 const GAME_W = BOARD_OFFSET_X * 2 + BOARD_W; // 960
-const GAME_H = BOARD_OFFSET_Y + BOARD_H + 130; // ~1186
+const GAME_H = BOARD_OFFSET_Y + BOARD_H + 150; // ~1222 (хелпери знизу)
 
 // ──────────────────────────────────────────────
 // Game Logger — для аналізу геймплею та балансу
@@ -179,6 +179,8 @@ class GameScene extends Phaser.Scene {
     // Лічильники зібраних інгредієнтів (матч BASIC/BONUS)
     this.ingredients = { flour: 0, milk: 0, butter: 0, berries: 0 };
     this.ingredientGoals = { flour: 10, milk: 3, butter: 5, berries: 5 };
+    this.allIngredientsComplete = false;
+    this.allowedTools = [];
     this.helpers = {
       owl: { charge: 0, max: 100, name: 'Сова', emoji: '🦉' },
       fox: { charge: 0, max: 100, name: 'Лисичка', emoji: '🦊' },
@@ -192,6 +194,7 @@ class GameScene extends Phaser.Scene {
     this.timer = this.levelData.timer_seconds;
     this.targetCount = this.levelData.target_count;
     this.targetType = this.levelData.target_type;
+    this.allowedTools = (this.levelData.tools || []).map(n => TILE[n.toUpperCase()]);
     if (this.levelData.ingredient_goals) {
       this.ingredientGoals = { ...this.ingredientGoals, ...this.levelData.ingredient_goals };
     }
@@ -229,14 +232,22 @@ class GameScene extends Phaser.Scene {
     // Input
     this.input.on('pointerdown', this.onPointerDown, this);
 
-    // Timer
+    // Стартові оверлеї: спершу знайомство з інструментами, потім завдання
+    this.isAnimating = true; // блокуємо поле, поки показуються оверлеї
+    const overlays = [];
+    if (this.allowedTools.length) overlays.push({ type: 'tools', tools: this.levelData.tools });
+    overlays.push({ type: 'task' });
+    this.showNextOverlay(overlays);
+  }
+
+  startTimer() {
+    this.isAnimating = false;
     this.timerEvent = this.time.addEvent({
       delay: 1000,
       callback: this.tickTimer,
       callbackScope: this,
       loop: true
     });
-
     // Auto-reshuffle check after short delay
     this.time.delayedCall(500, () => this.checkPossibleMoves());
   }
@@ -246,21 +257,21 @@ class GameScene extends Phaser.Scene {
     const g = this.ingredientGoals;
 
     // Окремий блок HUD
-    this.add.rectangle(width/2, 78, width - 16, 148, 0xFFFFFF, 0.95)
+    this.add.rectangle(width/2, 84, width - 16, 168, 0xFFFFFF, 0.95)
       .setStrokeStyle(2, 0xD7CCC8);
 
     // Рядок 1: рівень
-    this.levelText = this.add.text(width/2, 12, `Рівень ${this.levelData.level}`, {
-      fontSize: '24px', color: '#5D4037', fontStyle: 'bold'
+    this.levelText = this.add.text(width/2, 6, `Рівень ${this.levelData.level}`, {
+      fontSize: '22px', color: '#5D4037', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
     // Рядок 2: ціль тортів (великий)
-    this.targetText = this.add.text(width/2, 42, `🎂 0 / ${this.targetCount}`, {
+    this.targetText = this.add.text(width/2, 34, `🎂 0 / ${this.targetCount}`, {
       fontSize: '36px', color: '#5D4037', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
     // Рядок 3: таймер
-    this.timerText = this.add.text(width/2, 88, `⏱ ${this.formatTime(this.timer)}`, {
+    this.timerText = this.add.text(width/2, 76, `⏱ ${this.formatTime(this.timer)}`, {
       fontSize: '28px', color: '#C62828', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
@@ -275,30 +286,32 @@ class GameScene extends Phaser.Scene {
     const slotW = 200;
     const startX = width/2 - (slotW * 1.5);
     this.ingTexts = {};
+    this.ingIcons = {};
     ingItems.forEach((item, i) => {
       const x = startX + i * slotW;
-      this.add.image(x, ingY, item.tex).setDisplaySize(36, 36);
-      this.ingTexts[item.field] = this.add.text(x + 28, ingY,
+      const icon = this.add.image(x, ingY, item.tex).setDisplaySize(48, 48);
+      this.ingIcons[item.field] = icon;
+      this.ingTexts[item.field] = this.add.text(x + 40, ingY,
         `${this.ingredients[item.field]}/${g[item.field]}`,
-        { fontSize: '22px', color: '#6D4C41', fontStyle: 'bold' }
+        { fontSize: '24px', color: '#6D4C41', fontStyle: 'bold' }
       ).setOrigin(0, 0.5);
     });
 
     // Helpers panel (bottom)
     this.helperTexts = {};
     const helpers = ['owl', 'fox', 'dragon'];
-    const helpersY = BOARD_OFFSET_Y + BOARD_H + 55;
+    const helpersY = BOARD_OFFSET_Y + BOARD_H + 62;
     helpers.forEach((key, i) => {
       const x = BOARD_OFFSET_X + 80 + i * 160;
       const y = helpersY;
-      this.add.circle(x, y, 36, 0xFFFFFF).setStrokeStyle(3, 0x8D6E63);
-      this.add.image(x, y - 2, key).setDisplaySize(56, 56);
-      this.helperTexts[key] = this.add.text(x, y + 44, '0%', {
-        fontSize: '14px', color: '#5D4037', fontStyle: 'bold'
+      this.add.circle(x, y, 44, 0xFFFFFF).setStrokeStyle(3, 0x8D6E63);
+      this.add.image(x, y - 2, key).setDisplaySize(72, 72);
+      this.helperTexts[key] = this.add.text(x, y + 54, '0%', {
+        fontSize: '16px', color: '#5D4037', fontStyle: 'bold'
       }).setOrigin(0.5);
 
       // Clickable for activation (when charged)
-      this.add.circle(x, y, 36, 0x000000, 0)
+      this.add.circle(x, y, 44, 0x000000, 0)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.activateHelper(key));
     });
@@ -343,20 +356,32 @@ class GameScene extends Phaser.Scene {
   }
 
   /**
-   * Random fill — інґредієнти, ягоди, інструменти, кава.
+   * Random fill — інґредієнти, ягоди, кава та інструменти рівня.
+   * Інструменти з'являються лише якщо дозволені рівнем (allowedTools).
    * Випічка лише зі матчів. Ягоди ~14% сумарно (реалістична ціль 5).
    */
   randomBasic() {
-    const roll = Math.random();
-    if (roll < 0.16) return TILE.FLOUR;
-    if (roll < 0.32) return TILE.MILK;
-    if (roll < 0.46) return TILE.SPICE;
-    if (roll < 0.60) return TILE.BUTTER;
-    if (roll < 0.70) return TILE.COFFEE;
-    if (roll < 0.78) return TILE.ROLLINGPIN;
-    if (roll < 0.86) return TILE.SPATULA;
-    if (roll < 0.93) return TILE.STRAWBERRY;  // ~7%
-    return TILE.BLUEBERRY;                    // ~7%
+    const useRolling = this.allowedTools.includes(TILE.ROLLINGPIN);
+    const useSpatula = this.allowedTools.includes(TILE.SPATULA);
+    const entries = [
+      { type: TILE.FLOUR,       p: 0.16 },
+      { type: TILE.MILK,        p: 0.16 },
+      { type: TILE.SPICE,       p: 0.14 },
+      { type: TILE.BUTTER,      p: 0.14 },
+      { type: TILE.COFFEE,      p: 0.10 },
+      { type: TILE.ROLLINGPIN,  p: useRolling ? 0.08 : 0 },
+      { type: TILE.SPATULA,     p: useSpatula ? 0.08 : 0 },
+      { type: TILE.STRAWBERRY,  p: 0.07 },
+      { type: TILE.BLUEBERRY,   p: 0.07 }
+    ];
+    const total = entries.reduce((s, e) => s + e.p, 0);
+    const roll = Math.random() * total;
+    let acc = 0;
+    for (const e of entries) {
+      acc += e.p;
+      if (roll < acc) return e.type;
+    }
+    return TILE.FLOUR;
   }
 
   initGrid() {
@@ -1005,9 +1030,144 @@ class GameScene extends Phaser.Scene {
     const g = this.ingredientGoals;
     const i = this.ingredients;
     ['flour', 'milk', 'butter', 'berries'].forEach(field => {
-      if (this.ingTexts[field]) {
-        this.ingTexts[field].setText(`${i[field]}/${g[field]}`);
+      const t = this.ingTexts[field];
+      if (!t) return;
+      const done = i[field] >= g[field];
+      t.setText(`${Math.min(i[field], g[field])}/${g[field]}${done ? ' ✓' : ''}`);
+      t.setColor(done ? '#2E7D32' : '#6D4C41');
+      if (this.ingIcons[field]) {
+        this.ingIcons[field].setTint(done ? 0x81C784 : 0xFFFFFF);
       }
+    });
+    this.checkIngredientCompletion();
+  }
+
+  /** Чи зібрано всі інгредієнти лічильника → +1 торт з анімацією */
+  checkIngredientCompletion() {
+    const g = this.ingredientGoals;
+    const i = this.ingredients;
+    const allDone = ['flour', 'milk', 'butter', 'berries'].every(f => i[f] >= g[f]);
+    if (allDone && !this.allIngredientsComplete) {
+      this.allIngredientsComplete = true;
+      this.rewardCakeFromIngredients();
+    }
+  }
+
+  /** Торт у центрі екрана → зменшується → летить на лічильник тортів */
+  rewardCakeFromIngredients() {
+    const { width, height } = this.cameras.main;
+    const target = this.targetText;
+
+    window.gameLog.log('ingredient_cake', { ingredients: { ...this.ingredients } });
+
+    const cake = this.add.image(width / 2, height / 2 - 40, 'cake')
+      .setScale(0.9).setDepth(25).setAlpha(0);
+
+    this.tweens.add({ targets: cake, alpha: 1, y: height / 2 - 120, duration: 250, ease: 'Sine.easeOut' });
+
+    this.tweens.add({
+      targets: cake,
+      x: target.x,
+      y: target.y + 20,
+      scale: 0.16,
+      alpha: 0.4,
+      delay: 400,
+      duration: 900,
+      ease: 'Sine.easeIn',
+      onComplete: () => {
+        cake.destroy();
+        this.cakesCollected++;
+        this.updateTargetUI();
+        this.tweens.add({ targets: target, scale: 1.3, duration: 120, yoyo: true });
+        this.showToast('🎂 Інгредієнти зібрано! +1 торт');
+        this.resetIngredients();
+        this.checkVictory();
+      }
+    });
+  }
+
+  resetIngredients() {
+    this.ingredients = { flour: 0, milk: 0, butter: 0, berries: 0 };
+    this.allIngredientsComplete = false;
+    this.updateIngredientsUI();
+  }
+
+  // ──────────────────────────────────────────────
+  // Стартові оверлеї: інструменти → завдання
+  // ──────────────────────────────────────────────
+  showNextOverlay(queue) {
+    if (!queue.length) {
+      this.startTimer();
+      return;
+    }
+    const next = queue.shift();
+    if (next.type === 'tools') {
+      this.showToolsOverlay(next.tools, () => this.showNextOverlay(queue));
+    } else {
+      this.showTaskOverlay(() => this.showNextOverlay(queue));
+    }
+  }
+
+  showToolsOverlay(tools, done) {
+    const { width, height } = this.cameras.main;
+    const objs = [];
+    const addObj = (o) => { objs.push(o); return o; };
+
+    addObj(this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.6).setDepth(30));
+    addObj(this.add.text(width/2, height/2 - 230, 'Новий інструмент!', {
+      fontSize: '34px', color: '#FFD700', fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(31));
+
+    tools.forEach((name, i) => {
+      const x = width/2 + (i - (tools.length - 1) / 2) * 200;
+      const tileId = TILE[name.toUpperCase()];
+      addObj(this.add.rectangle(x, height/2 - 50, 170, 170, 0xFFFFFF, 0.15)
+        .setStrokeStyle(2, 0xFFFFFF).setDepth(31));
+      addObj(this.add.image(x, height/2 - 50, name).setDisplaySize(130, 130).setDepth(32));
+      const desc = tileId === TILE.ROLLINGPIN
+        ? '4+ скалки: усе борошно → печиво'
+        : '4+ лопатки: усе печиво → капкейк';
+      addObj(this.add.text(x, height/2 + 75, desc, {
+        fontSize: '18px', color: '#fff'
+      }).setOrigin(0.5).setDepth(32));
+    });
+
+    const btn = addObj(this.add.rectangle(width/2, height/2 + 210, 220, 54, 0xE67E22)
+      .setInteractive({ useHandCursor: true }).setDepth(31));
+    addObj(this.add.text(width/2, height/2 + 210, 'Далі', {
+      fontSize: '22px', color: '#fff', fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(32));
+    btn.on('pointerdown', () => {
+      objs.forEach(o => o.destroy());
+      done();
+    });
+  }
+
+  showTaskOverlay(done) {
+    const { width, height } = this.cameras.main;
+    const objs = [];
+    const addObj = (o) => { objs.push(o); return o; };
+
+    addObj(this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.6).setDepth(30));
+    addObj(this.add.text(width/2, height/2 - 230, `Рівень ${this.levelData.level}`, {
+      fontSize: '30px', color: '#FFD700', fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(31));
+    addObj(this.add.image(width/2, height/2 - 90, 'cake').setDisplaySize(140, 140).setDepth(31));
+    addObj(this.add.text(width/2, height/2 + 10, `Спечіть ${this.targetCount} 🎂`, {
+      fontSize: '36px', color: '#fff', fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(31));
+    addObj(this.add.text(width/2, height/2 + 80, 'Збирайте інгредієнти та складайте комбінації', {
+      fontSize: '18px', color: '#ddd'
+    }).setOrigin(0.5).setDepth(31));
+
+    const btn = addObj(this.add.rectangle(width/2, height/2 + 180, 220, 54, 0x4CAF50)
+      .setInteractive({ useHandCursor: true }).setDepth(31));
+    addObj(this.add.text(width/2, height/2 + 180, 'Почати', {
+      fontSize: '22px', color: '#fff', fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(32));
+    btn.on('pointerdown', () => {
+      objs.forEach(o => o.destroy());
+      done();
     });
   }
 
@@ -1109,7 +1269,7 @@ class GameScene extends Phaser.Scene {
 const config = {
   type: Phaser.AUTO,
   width: GAME_W,   // 960
-  height: GAME_H,  // ~1186
+  height: GAME_H,  // ~1222
   parent: 'game-container',
   backgroundColor: '#f5e6c8',
   scene: [BootScene, MenuScene, GameScene],
