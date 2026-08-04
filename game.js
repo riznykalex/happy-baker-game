@@ -171,6 +171,7 @@ class GameScene extends Phaser.Scene {
 
   init(data) {
     this.levelIndex = data.levelIndex || 0;
+    this.completedLevels = this.loadProgress();
     this.grid = [];
     this.tiles = []; // visual sprites
     this.selected = null;
@@ -208,6 +209,25 @@ class GameScene extends Phaser.Scene {
       fox: { charge: 0, max: 100, name: 'Лисичка', emoji: '🦊' },
       dragon: { charge: 0, max: 100, name: 'Дракончик', emoji: '🐉' }
     };
+  }
+
+  /** Завантажує збережені пройдені рівні (localStorage) */
+  loadProgress() {
+    try {
+      const raw = localStorage.getItem('hb_progress');
+      return new Set(raw ? JSON.parse(raw) : []);
+    } catch (e) {
+      return new Set();
+    }
+  }
+
+  /** Зберігає прогрес у localStorage */
+  saveProgress() {
+    try {
+      localStorage.setItem('hb_progress', JSON.stringify(Array.from(this.completedLevels)));
+    } catch (e) {
+      // приватний режим / переповнення — ігноруємо
+    }
   }
 
   create() {
@@ -336,10 +356,14 @@ class GameScene extends Phaser.Scene {
     this.add.rectangle(width/2, 188, width - 16, 376, 0xFFFFFF, 0.95)
       .setStrokeStyle(5, 0xD7CCC8);
 
-    // Рядок 1: рівень
-    this.levelText = makeText(this, width/2, 4, `Рівень ${this.levelData.level}`, {
+    // Рядок 1: рівень (клік — список рівнів)
+    this.levelText = makeText(this, width/2, 4, `Рівень ${this.levelData.level} ▾`, {
       fontSize: '50px', color: '#5D4037', fontStyle: 'bold'
-    }).setOrigin(0.5, 0);
+    }).setOrigin(0.5, 0)
+      .setInteractive({ useHandCursor: true })
+      .on('pointerover', () => this.levelText.setColor('#8D6E63'))
+      .on('pointerout', () => this.levelText.setColor('#5D4037'))
+      .on('pointerdown', () => this.showLevelSelect());
 
     // Рядок 2: ціль (залежить від target_type)
     const targetFont = ['combo_target', 'layered_cake', 'clear_obstacles'].includes(this.targetType) ? '56px' : '72px';
@@ -1765,6 +1789,9 @@ class GameScene extends Phaser.Scene {
     });
     window.gameLog.summary(); // швидкий огляд у консолі
 
+    this.completedLevels.add(this.levelData.level);
+    this.saveProgress();
+
     const { width, height } = this.cameras.main;
     this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.6).setDepth(30);
     makeText(this, width/2, height/2 - 100, '🎉 Level Complete! 🎉', {
@@ -1822,6 +1849,53 @@ class GameScene extends Phaser.Scene {
     makeText(this, width/2, height/2 + 100, 'Try Again', {
       fontSize: '50px', color: '#fff'
     }).setOrigin(0.5).setDepth(32);
+  }
+
+  /** Оверлей вибору рівня: пройдені — зелені, непройдені — сірі (усі доступні) */
+  showLevelSelect() {
+    if (this.isAnimating) return;
+    this.isAnimating = true; // блокуємо поле (і таймер зупиняється через isAnimating)
+
+    const { width, height } = this.cameras.main;
+    const levels = this.cache.json.get('levels');
+    const objs = [];
+    const addObj = (o) => { objs.push(o); return o; };
+    const closeOverlay = () => {
+      objs.forEach(o => o.destroy());
+      this.isAnimating = false;
+    };
+
+    addObj(this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.75).setDepth(40));
+
+    addObj(makeText(this, width/2, 50, 'Вибір рівня', {
+      fontSize: '60px', color: '#FFD700', fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(41));
+
+    const cols = 8, startX = 150, startY = 150, dx = 84, dy = 88, r = 31;
+    levels.forEach((lv, idx) => {
+      const x = startX + (idx % cols) * dx;
+      const y = startY + Math.floor(idx / cols) * dy;
+      const done = this.completedLevels.has(lv.level);
+      const circle = addObj(this.add.circle(x, y, r, done ? 0x4CAF50 : 0x9E9E9E, 0.95)
+        .setStrokeStyle(2, 0xFFFFFF, 0.4)
+        .setInteractive({ useHandCursor: true })
+        .setDepth(41));
+      addObj(makeText(this, x, y, String(lv.level), {
+        fontSize: '30px', color: '#fff', fontStyle: 'bold'
+      }).setOrigin(0.5).setDepth(42));
+      circle.on('pointerdown', () => {
+        closeOverlay();
+        this.scene.restart({ levelIndex: idx });
+      });
+    });
+
+    const close = addObj(this.add.rectangle(width - 70, 70, 80, 80, 0xE53935, 0.9)
+      .setInteractive({ useHandCursor: true })
+      .setDepth(41));
+    addObj(makeText(this, width - 70, 70, '✕', {
+      fontSize: '42px', color: '#fff', fontStyle: 'bold'
+    }).setOrigin(0.5).setDepth(42));
+    close.on('pointerdown', closeOverlay);
   }
 }
 

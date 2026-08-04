@@ -2,7 +2,7 @@
 
 Cozy Match-3 RPG (MVP). Web-гра на **Phaser 3** + HTML5 Canvas.
 
-Останнє оновлення: win-умови за `target_type` (cakes/coffee/guests/combo_target/layered_cake/clear_obstacles), `tile_weights`, `allowed_helpers`, `moves_limit`, `obstacles[].count`, показ `name` в оверлеї завдання. Контракт конфігу — `TZ_LEVELS.md`.
+Останнє оновлення: список рівнів (клік на заголовок) + прогрес у localStorage; win-умови за `target_type` (cakes/coffee/guests/combo_target/layered_cake/clear_obstacles), `tile_weights`, `allowed_helpers`, `moves_limit`, `obstacles[].count`, показ `name` в оверлеї завдання. Контракт конфігу — `TZ_LEVELS.md`.
 
 ---
 
@@ -256,6 +256,8 @@ HUD — білий блок зверху (висота 376px). Рядок ціл
 
 Помічники — лише з `allowed_helpers` (без дракончика/лисички їх кола не малюються і заряд не копиться). У режимі `moves_limit` рядок таймера показує лічильник ходів.
 
+Заголовок «Рівень N ▾» клікабельний — відкриває сітку 53 рівнів: пройдені зелені, непройдені сірі, усі доступні. Прогрес зберігається в `localStorage` (`hb_progress` = масив номерів пройдених рівнів), оновлюється у `showVictory`.
+
 Фон ігрової сцени: `#f5e6c8`. `bg.jpg` використовується лише в Menu.
 
 **Шрифт**: `Balsamiq Sans` (Google Fonts, підтримує кирилицю) — задається глобально через хелпер `makeText(scene, x, y, str, style)` у `game.js`.
@@ -370,8 +372,9 @@ python3 server.py
 | C | `tile_weights`, `allowed_helpers`, `moves_limit`, `name` | ✅ |
 | D | `obstacles[].count` (випадкова розкладка без накладок) | ✅ |
 | E | 53 рівні від data-розробника + `validate_levels.js` | ✅ |
-| F | Tween-гравітація, juice, звук | ○ |
-| G | ES modules / atlas | ○ |
+| F | Список рівнів + прогрес у localStorage | ✅ |
+| G | Tween-гравітація, juice, звук | ○ |
+| H | ES modules / atlas | ○ |
 
 ---
 
