@@ -2,6 +2,8 @@
 
 Cozy Match-3 RPG (MVP). Web-гра на **Phaser 3** + HTML5 Canvas.
 
+Останнє оновлення: мобільний HUD з лічильниками інгредієнтів, ланцюжок випічки, скалка/лопатка, спрайти 128×128.
+
 ---
 
 ## 1. Огляд системи
@@ -25,10 +27,10 @@ Cozy Match-3 RPG (MVP). Web-гра на **Phaser 3** + HTML5 Canvas.
 | Шар | Технологія | Призначення |
 |-----|------------|-------------|
 | Presentation | Phaser 3 (Canvas/WebGL) | Рендер, input, tweens |
-| Game logic | Vanilla JS у `game.js` | Match-3, гравітація, помічники, HUD |
+| Game logic | Vanilla JS у `game.js` | Match-3, ланцюжок, інструменти, HUD |
 | Data | `levels.json` | Конфіг 10 рівнів |
-| Assets | PNG 128×128 + bg.jpg | Тайли, персонажі, фон |
-| Dev server | `server.py` (stdlib http) | Локальна роздача + no-cache |
+| Assets | PNG 128×128 + bg.jpg | Тайли, персонажі (bg лише в Menu) |
+| Dev server | `server.py` | Локальна роздача + no-cache |
 
 ---
 
@@ -36,20 +38,20 @@ Cozy Match-3 RPG (MVP). Web-гра на **Phaser 3** + HTML5 Canvas.
 
 ```
 game/
-├── index.html          # Точка входу, CDN Phaser 3.80
-├── game.js             # Уся ігрова логіка (~1000 рядків)
-├── levels.json         # 10 рівнів MVP
-├── server.py           # Локальний HTTP-сервер :8080
-├── architecture.md     # Цей документ
+├── index.html
+├── game.js                 # уся логіка
+├── levels.json             # 10 рівнів
+├── server.py
+├── architecture.md
 └── assets/
-    ├── bg.jpg          # Ізометричний інтер'єр пекарні
-    ├── sprites.png     # Sheet 512×512 (4×4 × 128px)
-    └── tiles/          # Нарізані спрайти 128×128
-        ├── flour.png, milk.png, spice.png, butter.png
-        ├── strawberry.png, blueberry.png
-        ├── croissant.png, cupcake.png, cake.png
-        ├── coffee.png, cookie.png
-        └── owl.png, fox.png, dragon.png
+    ├── bg.jpg              # лише MenuScene
+    ├── sprites.png         # sheet 512×512 (4×4 × 128)
+    └── tiles/              # рівно 128×128, без trim
+        ├── flour, milk, spice, butter
+        ├── strawberry, blueberry
+        ├── coffee, rollingpin, spatula
+        ├── cookie, croissant, cupcake, cake
+        └── owl, fox, dragon
 ```
 
 ---
@@ -57,153 +59,178 @@ game/
 ## 3. Сцени Phaser
 
 ```
-BootScene  →  preload assets + levels.json
+BootScene  →  preload
      │
      ▼
-MenuScene  →  фон, кнопка «Почати гру»
+MenuScene  →  bg.jpg + «Почати гру»
      │
      ▼
-GameScene  →  основний геймплей (levelIndex 0..9)
-     │
-     ├─ Victory → restart(levelIndex+1) або Menu
-     └─ Defeat  → restart(same level)
+GameScene  →  геймплей (без bg, нейтральний #f5e6c8)
+     ├─ Victory → next level / menu
+     └─ Defeat  → retry
 ```
-
-### BootScene
-- Завантажує `bg`, `sprites`, `levels.json`, усі `tiles/*`.
-- Одразу переходить у `Menu`.
-
-### MenuScene
-- Статичний екран з фоном і start-кнопкою.
-- Передає `{ levelIndex: 0 }` у Game.
-
-### GameScene
-- Єдине місце з ігровою логікою.
-- Життєвий цикл: `init` → `create` → input/timer loop → victory/defeat.
 
 ---
 
-## 4. Ігрове поле (Match-3 Core)
+## 4. Розміри (мобільний-friendly)
 
-### Константи розміру
+| Константа | Значення |
+|-----------|----------|
+| `TILE_SIZE` | **128** (нативний розмір спрайта, без setDisplaySize) |
+| `GRID_SIZE` | 7 |
+| `BOARD_W/H` | **896** (7×128) |
+| `GAME_W` | 960 |
+| `GAME_H` | ~1186 (BOARD_OFFSET_Y 160 + поле 896 + хелпери 130) |
+| HUD | окремий білий блок зверху, шрифти 22–36px |
 
-| Константа | Значення | Опис |
-|-----------|----------|------|
-| `TILE_SIZE` | 128 | Оригінальний розмір спрайта (без scale) |
-| `GRID_SIZE` | 7 | Сітка 7×7 |
-| `BOARD_W/H` | 896 | 7 × 128 |
-| `GAME_W` | 960 | Поле + бокові відступи |
-| `GAME_H` | ~1122 | HUD + поле + панель помічників |
+Scale mode: `Phaser.Scale.FIT` + `CENTER_BOTH`.
 
-### Модель даних
+---
 
-```
-grid[r][c]  : number   // TILE.* або TILE.EMPTY (-1)
-tiles[r][c] : Container // { sprite, glow } — візуал Phaser
-```
-
-Логіка завжди йде від `grid`; `tiles` лише відображає стан (після гравітації — повний `drawGrid()`).
-
-### Типи тайлів
+## 5. Типи тайлів
 
 ```
-BASIC (спавнять випічку):
+BASIC (інґредієнти → старт ланцюжка):
   FLOUR(0)  MILK(1)  SPICE(2)  BUTTER(3)
 
-BONUS (час / заряд, без spawn випічки):
+BONUS (ягоди):
   STRAWBERRY(4)  BLUEBERRY(5)
 
-BAKERY (результати матчів):
-  CROISSANT(6)  CUPCAKE(7)  CAKE(8)
+FILLERS / TOOLS (розрідження + суперходи):
+  COFFEE(6)  ROLLINGPIN(7)  SPATULA(8)
 
-SPECIAL:
-  COFFEE(9)  BURNT(10)
+BAKERY (лише зі матчів, не з random fill):
+  COOKIE(9)      // корж / печиво
+  CROISSANT(10)
+  CUPCAKE(11)
+  CAKE(12)
 
 EMPTY: -1
 ```
 
-### Цикл ходу
+### Random fill (`randomBasic`)
+
+```
+flour 16% | milk 16% | spice 14% | butter 14%
+coffee 10% | rollingpin 8% | spatula 8%
+strawberry 7% | blueberry 7%
+```
+
+Випічка **ніколи** не падає згори — лише spawn після матчу.
+
+---
+
+## 6. Ланцюжок випічки
+
+```
+BASIC
+  Match-3 → COOKIE (корж)
+  Match-4 → CROISSANT
+  Match-5 → CUPCAKE
+
+COOKIE
+  Match-3 → CROISSANT
+  Match-4+ → CUPCAKE
+
+CROISSANT
+  Match-3 → CUPCAKE
+  Match-4+ → CAKE (+1 до цілі)
+
+CUPCAKE
+  Match-3+ → CAKE (+1 до цілі)
+
+CAKE
+  Match-3+ → кожен торт +1 до цілі
+```
+
+---
+
+## 7. Інструменти (суперходи)
+
+| Матч | Ефект |
+|------|--------|
+| **4+ ROLLINGPIN (скалка)** | Усі FLOUR на полі → COOKIE |
+| **4+ SPATULA (лопатка)** | Усі COOKIE на полі → CUPCAKE |
+| 3 інструменти | невеликий бонус до таймера |
+| COFFEE Match-3+ | +час |
+
+Конвертація виконується після очищення групи матчу, **до** `applyGravity`, з тостом і записом у лог (`type: "convert"`).
+
+---
+
+## 8. Цикл ходу
 
 ```
 pointerdown → select / trySwap
     │
-    ├─ swap data + tween
-    │
-    ├─ findAllMatches()        // прямі рядки/стовпці ≥3
-    │     └─ splitIntoGroups() // зв'язані компоненти одного типу
-    │
-    ├─ resolveMatches(groups)
-    │     ├─ charge helpers / timer bonuses
-    │     ├─ spawn CROISSANT / CUPCAKE / CAKE (для BASIC)
-    │     ├─ cakesCollected += …
-    │     └─ pop-анімація → EMPTY
-    │
-    └─ applyGravity()
-          ├─ падіння вниз + fill randomBasic()
-          ├─ drawGrid()
-          └─ cascade (delayed findAllMatches) або idle
-                ├─ checkPossibleMoves() → autoReshuffle?
-                └─ checkVictory()
+    ├─ swap + tween
+    ├─ findAllMatches()      // прямі рядки/стовпці ≥3
+    ├─ splitIntoGroups()     // зв'язані групи одного типу
+    ├─ resolveMatches()
+    │     ├─ зарядка / час / spawn ланцюжка
+    │     ├─ flags: convertFlourToCookie / convertCookieToCupcake
+    │     ├─ pop-анімація → EMPTY
+    │     ├─ apply spawns + board-wide convert
+    │     └─ applyGravity()
+    └─ cascade / checkPossibleMoves / checkVictory
 ```
 
-### Правила матчів
-
-| Група | Ефект |
-|-------|--------|
-| BASIC size 3 | → CROISSANT |
-| BASIC size 4 | → CUPCAKE, +2 сек |
-| BASIC size ≥5 | → CAKE, +1 до цілі, бонус заряду |
-| CUPCAKE ≥3 | +1 торт, +час |
-| CROISSANT 4 | → CUPCAKE |
-| CROISSANT ≥5 | → CAKE, +1 до цілі |
-| CAKE ≥3 | кожен торт → +1 до цілі |
-| STRAWBERRY | +1 сек/тайл, малий заряд усім |
-| BLUEBERRY | +2 сек/тайл, більший заряд усім |
-| BUTTER | малий заряд усім помічникам |
-
-`findAllMatches` шукає **прямі** горизонтальні/вертикальні лінії.  
-`splitIntoGroups` об'єднує сусідні клітинки **одного типу** (T/L-форми дають більший size).
-
-### Auto-Reshuffle
-
-Якщо після каскаду немає жодного валідного ходу (перебір усіх сусідніх swap) — перемішуються лише BASIC+BONUS тайли, випічка й перешкоди лишаються.
+**Auto-Reshuffle**: якщо немає валідного ходу — перемішуються BASIC+BONUS+FILLER; випічка лишається.
 
 ---
 
-## 5. Помічники (RPG-lite)
+## 9. Помічники
 
 | Персонаж | Ресурс | Ефект |
 |----------|--------|--------|
-| 🦉 Сова | FLOUR | Freeze timer 10 с |
-| 🦊 Лисичка | SPICE | Reshuffle з гарантією ходів |
-| 🐉 Дракончик | MILK | Обраний CUPCAKE → CAKE |
+| Сова | FLOUR | Freeze timer 10 с |
+| Лисичка | SPICE | Reshuffle |
+| Дракончик | MILK | CUPCAKE → CAKE |
 
-- Заряд 0…100. Повний заряд ≈ 15–20 відповідних тайлів.
-- UI: іконка + відсоток; клік активує, якщо `charge >= 100`.
-
----
-
-## 6. HUD і екрани
-
-```
-┌──────────────────────────────────────┐
-│ Рівень N    🎂 2/5         01:30     │  ← top bar
-├──────────────────────────────────────┤
-│                                      │
-│           7×7 board (896×896)        │
-│                                      │
-├──────────────────────────────────────┤
-│  [🦉 45%]  [🦊 12%]  [🐉 80%]   Log │  ← helpers + export
-└──────────────────────────────────────┘
-```
-
-- **Victory**: пауза, «Level Complete», next level / menu.
-- **Defeat**: «Time's Up», retry.
-- Тости для здібностей помічників.
+Заряд 0…100 (~15–20 тайлів до повного). UI знизу під полем.
 
 ---
 
-## 7. Рівні (`levels.json`)
+## 10. HUD (GameScene)
+
+```
+┌────────────────────────────────────────┐
+│              Рівень N                  │
+│          🎂 2/5  (36px)                │
+│          ⏱ 01:24  (28px)              │
+│  🌾 10/10  🥛 3/3  🧈 5/5  🍓 5/5    │
+│   (лічильники інгредієнтів, 22px)      │
+├────────────────────────────────────────┤
+│          поле 896×896                  │
+│      (рамка, без bg.jpg)               │
+├────────────────────────────────────────┤
+│  Сова %  Лисиця %  Дракон %      Log  │
+└────────────────────────────────────────┘
+```
+
+HUD — білий блок зверху (висота 148px), лічильники інгредієнтів оновлюються з матчів FLOUR/MILK/BUTTER/ягід. Квоти беруться з `levels.json → ingredient_goals` (за замовчуванням: flour 10, milk 3, butter 5, berries 5).
+
+Фон ігрової сцени: `#f5e6c8`. `bg.jpg` використовується лише в Menu.
+
+---
+
+## 11. Логування
+
+`window.gameLog` — події:
+
+| type | Зміст |
+|------|--------|
+| `level_start` / `level_end` | старт / victory\|defeat |
+| `swap` | from/to, valid |
+| `match` | size, kind, tileType, spawn, special, cakesGained |
+| `convert` | tool, from, to, count |
+| `helper` / `reshuffle` / `timer` | стан |
+
+Кнопка Log → summary + download JSON.
+
+---
+
+## 12. Рівні (`levels.json`)
 
 ```json
 {
@@ -213,76 +240,48 @@ pointerdown → select / trySwap
   "target_count": 5,
   "obstacle_tiles": 0,
   "allowed_helpers": ["owl", "fox", "dragon"],
+  "ingredient_goals": { "flour": 10, "milk": 3, "butter": 5, "berries": 5 },
   "description": "…"
 }
 ```
 
-MVP зараз повноцінно реалізує `target_type: "cakes"` (лічильник `cakesCollected`).  
-Інші типи (`guests`, `clean_burnt`, `coffee`, …) закладені в JSON і HUD-лейблах; повна логіка — наступні ітерації.
+`ingredient_goals` опціональний — якщо відсутній, діють дефолти (flour 10, milk 3, butter 5, berries 5).
+
+MVP win-condition: `cakesCollected >= target_count` (тип `cakes`).
+Інші `target_type` — заготовки під наступні ітерації.
 
 ---
 
-## 8. Логування геймплею
-
-Клас `GameLogger` (глобально `window.gameLog`):
-
-| Подія | Коли |
-|-------|------|
-| `level_start` | старт рівня |
-| `swap` | спроба обміну (valid true/false) |
-| `match` | кожна група після split |
-| `helper` | активація здібності |
-| `reshuffle` | auto-reshuffle |
-| `timer` | кожні 15 с + residual ≤5 |
-| `level_end` | victory / defeat + підсумок |
-
-- Кнопка **📋 Log** → `summary()` + download JSON.
-- З консолі: `gameLog.getLog()`, `gameLog.download()`.
-
-Призначення: баланс, QA, відтворення багів («тайли не склалися»).
-
----
-
-## 9. Ассети
-
-- Sheet **512×512**, сітка **4×4 × 128px**.
-- Нарізка: точні комірки 128×128 **без trim** → без розтягування на полі.
-- Рендер тайлів: `this.add.image(x, y, key)` на нативному розмірі (scale 1).
-- Виділення: glow + `setScale(1.04)`.
-
----
-
-## 10. Запуск
+## 13. Запуск
 
 ```bash
 cd game
 python3 server.py
-# → http://localhost:8080
+# http://localhost:8080
 ```
 
-`server.py` віддає файли з `Cache-Control: no-store` для зручної ітерації.
+---
+
+## 14. Обмеження MVP
+
+1. Не всі `target_type` мають окрему логіку перемоги.
+2. Немає tween-падіння по клітинках (миттєвий `drawGrid` після гравітації).
+3. Немає звуку / частинок.
+4. Лічильники інгредієнтів (flour/milk/butter/berries) відображаються в HUD, але поки не впливають на win/lose-умови.
+5. Монолітний `game.js` — при рості розбити на модулі.
 
 ---
 
-## 11. Відомі обмеження MVP
+## 15. Roadmap
 
-1. Не всі `target_type` з JSON мають окрему win-логіку (лише `cakes`).
-2. `obstacle_tiles` / BURNT поки не спавняться на старті рівня.
-3. Гравітація — миттєвий `drawGrid()`, без tween падіння по клітинках.
-4. Немає звуку / частинок (juice частково: scale pop, glow).
-5. Один файл `game.js` — при рості варто розбити на модулі (`Board`, `Matchers`, `Helpers`, `HUD`).
-
----
-
-## 12. Рекомендований roadmap
-
-| Спринт | Фокус |
-|--------|--------|
-| **A** | Tween-гравітація, частинки, звук |
-| **B** | Повна логіка рівнів 2–10 (burnt, coffee, guests) |
-| **C** | Модульність (ES modules / bundler), atlas замість окремих PNG |
-| **D** | Метрики з логів → баланс таймера/заряду/ваг спавну |
+| Крок | Зміст |
+|------|--------|
+| A | ✅ Лічильники інгредієнтів у HUD + квоти в levels.json |
+| B | Інгредієнти як win/lose-умова на рівнях 2–10 |
+| C | Tween-гравітація, juice, звук |
+| D | Повна логіка рівнів 2–10 (coffee, clean_burnt, guests…) |
+| E | ES modules / atlas |
 
 ---
 
-*Документ відповідає стану коду на момент написання. При зміні контрактів (TILE enum, JSON levels, API логера) — оновлювати цей файл.*
+*Документ відповідає стану коду з ланцюжком корж→торт, інструментами скалка/лопатка та мобільним HUD.*

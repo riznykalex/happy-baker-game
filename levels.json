@@ -5,17 +5,34 @@
     "target_type": "cakes",
     "target_count": 5,
     "obstacle_tiles": 0,
-    "allowed_helpers": ["owl", "fox", "dragon"],
-    "description": "Відкриття кафе: спечи 5 тортів з борошна, молока, масла та спецій"
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "description": "Відкриття кафе: спечи 5 тортів з борошна, молока, масла та спецій",
+    "ingredient_goals": {
+      "flour": 10,
+      "milk": 3,
+      "butter": 5,
+      "berries": 5
+    }
   },
   {
     "level": 2,
     "timer_seconds": 90,
     "target_type": "guests",
     "target_count": 10,
-    "target_details": {"milk": 10, "flour": 10},
+    "target_details": {
+      "milk": 10,
+      "flour": 10
+    },
     "obstacle_tiles": 0,
-    "allowed_helpers": ["owl", "fox", "dragon"],
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
     "description": "Ранкові гості: зберіть молоко і борошно. Ягоди дають бонус часу"
   },
   {
@@ -24,7 +41,11 @@
     "target_type": "clean_burnt",
     "target_count": 4,
     "obstacle_tiles": 4,
-    "allowed_helpers": ["owl", "fox", "dragon"],
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
     "description": "Кухонна халепа: приберіть 4 пригорілих печива"
   },
   {
@@ -33,7 +54,11 @@
     "target_type": "coffee",
     "target_count": 8,
     "obstacle_tiles": 0,
-    "allowed_helpers": ["owl", "fox", "dragon"],
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
     "description": "Еспресо-спринт: 8 чашок кави. Лохина рятує час!"
   },
   {
@@ -41,9 +66,15 @@
     "timer_seconds": 110,
     "target_type": "layered_cake",
     "target_count": 1,
-    "target_details": {"cupcakes_needed": 3},
+    "target_details": {
+      "cupcakes_needed": 3
+    },
     "obstacle_tiles": 0,
-    "allowed_helpers": ["owl", "fox", "dragon"],
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
     "description": "Весільний заказ: зберіть 3 капкейки в один торт. Масло — секрет ніжності"
   },
   {
@@ -51,9 +82,16 @@
     "timer_seconds": 100,
     "target_type": "animal_treats",
     "target_count": 15,
-    "target_details": {"spices": 15, "flour": 15},
+    "target_details": {
+      "spices": 15,
+      "flour": 15
+    },
     "obstacle_tiles": 0,
-    "allowed_helpers": ["owl", "fox", "dragon"],
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
     "description": "День смаколиків для звірят: спеції, борошно і ягідний декор"
   },
   {
@@ -61,9 +99,16 @@
     "timer_seconds": 120,
     "target_type": "combo_target",
     "target_count": 3,
-    "target_details": {"cakes": 3, "cupcakes": 8},
+    "target_details": {
+      "cakes": 3,
+      "cupcakes": 8
+    },
     "obstacle_tiles": 0,
-    "allowed_helpers": ["owl", "fox", "dragon"],
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
     "description": "Фестиваль десертів: 3 торти + 8 капкейків"
   },
   {
@@ -72,7 +117,11 @@
     "target_type": "burnt_night",
     "target_count": 6,
     "obstacle_tiles": 6,
-    "allowed_helpers": ["owl", "fox", "dragon"],
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
     "description": "Нічна зміна: 6 пригорілих. Сова заморозить час"
   },
   {
@@ -81,7 +130,11 @@
     "target_type": "vip_guests",
     "target_count": 1,
     "obstacle_tiles": 2,
-    "allowed_helpers": ["owl", "fox", "dragon"],
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
     "description": "VIP: особливе комбо з масла, лохини та полуниці"
   },
   {
@@ -90,7 +143,11 @@
     "target_type": "grand_cake",
     "target_count": 1,
     "obstacle_tiles": 8,
-    "allowed_helpers": ["owl", "fox", "dragon"],
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
     "description": "Королівський банкет: гігантський торт з усіх інгредієнтів"
   }
 ]
