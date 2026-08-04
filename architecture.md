@@ -201,7 +201,7 @@ pointerdown → select / trySwap
     └─ cascade / checkPossibleMoves / checkVictory
 ```
 
-**Auto-Reshuffle**: якщо немає валідного ходу — перемішуються BASIC+BONUS+FILLER; випічка лишається.
+**Auto-Reshuffle**: якщо немає валідного ходу — перемішуються **всі** комірки, включно з випічкою користувача (COOKIE/CROISSANT/CUPCAKE/CAKE); кількість кожного типу зберігається.
 
 **Підказка (hint)**: якщо гравець не ходить > 5 сек — `checkIdleHint` знаходить валідний своп через `findHintMove()` і підсвічує жовтим пару тайлів (без тексту). Ховається при будь-якому тапі (`hideHint`).
 

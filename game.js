@@ -1027,9 +1027,8 @@ class GameScene extends Phaser.Scene {
       { fontSize: '45px', color: '#fff', backgroundColor: '#5D4037', padding: { x: 22, y: 14 } }
     ).setOrigin(0.5).setDepth(10).setName('reshuffleText');
 
-    // Перемішуємо fill-тайли (не випічку)
-    const isShuffleable = (t) =>
-      BASIC_TILES.includes(t) || BONUS_TILES.includes(t) || FILLER_TILES.includes(t);
+    // Перемішуємо всі комірки включно з випічкою користувача
+    const isShuffleable = (t) => t !== TILE.EMPTY;
     const basics = [];
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
