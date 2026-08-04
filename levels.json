@@ -21,7 +21,7 @@
   },
   {
     "level": 2,
-    "timer_seconds": 90,
+    "timer_seconds": 120,
     "target_type": "guests",
     "target_count": 10,
     "target_details": {
@@ -39,7 +39,7 @@
   },
   {
     "level": 3,
-    "timer_seconds": 100,
+    "timer_seconds": 120,
     "target_type": "clean_burnt",
     "target_count": 4,
     "obstacle_tiles": 4,
@@ -53,7 +53,7 @@
   },
   {
     "level": 4,
-    "timer_seconds": 60,
+    "timer_seconds": 120,
     "target_type": "coffee",
     "target_count": 8,
     "obstacle_tiles": 0,
@@ -67,7 +67,7 @@
   },
   {
     "level": 5,
-    "timer_seconds": 110,
+    "timer_seconds": 120,
     "target_type": "layered_cake",
     "target_count": 1,
     "target_details": {
@@ -84,7 +84,8 @@
   },
   {
     "level": 6,
-    "timer_seconds": 100,
+    "timer_seconds": 120,
+    "berry_type": "blueberry",
     "target_type": "animal_treats",
     "target_count": 15,
     "target_details": {
@@ -120,7 +121,8 @@
   },
   {
     "level": 8,
-    "timer_seconds": 100,
+    "timer_seconds": 120,
+    "berry_type": "blueberry",
     "target_type": "burnt_night",
     "target_count": 6,
     "obstacle_tiles": 6,
@@ -134,7 +136,8 @@
   },
   {
     "level": 9,
-    "timer_seconds": 90,
+    "timer_seconds": 120,
+    "berry_type": "blueberry",
     "target_type": "vip_guests",
     "target_count": 1,
     "obstacle_tiles": 2,
@@ -148,7 +151,7 @@
   },
   {
     "level": 10,
-    "timer_seconds": 150,
+    "timer_seconds": 120,
     "target_type": "grand_cake",
     "target_count": 1,
     "obstacle_tiles": 8,

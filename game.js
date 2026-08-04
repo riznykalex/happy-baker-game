@@ -10,13 +10,16 @@ const BOARD_H = GRID_SIZE * TILE_SIZE; // 896
 const BOARD_OFFSET_X = 32;
 const BOARD_OFFSET_Y = 376;     // місце під HUD зверху
 const GAME_W = BOARD_OFFSET_X * 2 + BOARD_W; // 960
-const GAME_H = BOARD_OFFSET_Y + BOARD_H + 255; // ~1527 (хелпери знизу)
+const GAME_H = BOARD_OFFSET_Y + BOARD_H + 200; // ~1472 (хелпери знизу)
 
 // Ігровий шрифт (кирилиця) — Balsamiq Sans із Google Fonts
 const FONT = "'Balsamiq Sans', 'Comfortaa', 'Segoe UI', sans-serif";
 function makeText(scene, x, y, str, style) {
   return scene.add.text(x, y, str, Object.assign({}, style, { fontFamily: FONT }));
 }
+
+// Анонс інструментів показуємо лише один раз (кожен інструмент — при першій появі)
+const announcedTools = new Set();
 
 // ──────────────────────────────────────────────
 // Game Logger — для аналізу геймплею та балансу
@@ -205,6 +208,7 @@ class GameScene extends Phaser.Scene {
     this.targetCount = this.levelData.target_count;
     this.targetType = this.levelData.target_type;
     this.allowedTools = (this.levelData.tools || []).map(n => TILE[n.toUpperCase()]);
+    this.berryType = this.levelData.berry_type || null;
     if (this.levelData.ingredient_goals) {
       this.ingredientGoals = { ...this.ingredientGoals, ...this.levelData.ingredient_goals };
     }
@@ -242,10 +246,14 @@ class GameScene extends Phaser.Scene {
     // Input
     this.input.on('pointerdown', this.onPointerDown, this);
 
-    // Стартові оверлеї: спершу знайомство з інструментами, потім завдання
+    // Стартові оверлеї: знайомство з новими інструментами (один раз), потім завдання
     this.isAnimating = true; // блокуємо поле, поки показуються оверлеї
     const overlays = [];
-    if (this.allowedTools.length) overlays.push({ type: 'tools', tools: this.levelData.tools });
+    const newTools = (this.levelData.tools || []).filter(n => !announcedTools.has(n));
+    if (newTools.length) {
+      newTools.forEach(n => announcedTools.add(n));
+      overlays.push({ type: 'tools', tools: newTools });
+    }
     overlays.push({ type: 'task' });
     this.showNextOverlay(overlays);
   }
@@ -298,7 +306,7 @@ class GameScene extends Phaser.Scene {
       { key: 'flour',      tex: 'flour',      field: 'flour' },
       { key: 'milk',       tex: 'milk',       field: 'milk' },
       { key: 'butter',     tex: 'butter',     field: 'butter' },
-      { key: 'berries',    tex: 'strawberry', field: 'berries' }
+      { key: 'berries',    tex: this.berryType === 'blueberry' ? 'blueberry' : 'strawberry', field: 'berries' }
     ];
     const colX = [144, 368, 592, 816];
     this.ingTexts = {};
@@ -320,18 +328,18 @@ class GameScene extends Phaser.Scene {
     // Helpers panel (bottom)
     this.helperTexts = {};
     const helpers = ['owl', 'fox', 'dragon'];
-    const helpersY = BOARD_OFFSET_Y + BOARD_H + 100;
+    const helpersY = BOARD_OFFSET_Y + BOARD_H + 80;
     helpers.forEach((key, i) => {
-      const x = BOARD_OFFSET_X + 150 + i * 300;
+      const x = BOARD_OFFSET_X + 150 + i * 240;
       const y = helpersY;
-      this.add.circle(x, y, 90, 0xFFFFFF).setStrokeStyle(5, 0x8D6E63);
-      this.add.image(x, y - 3, key).setDisplaySize(162, 162);
-      this.helperTexts[key] = makeText(this, x, y + 112, '0%', {
-        fontSize: '36px', color: '#5D4037', fontStyle: 'bold'
+      this.add.circle(x, y, 68, 0xFFFFFF).setStrokeStyle(4, 0x8D6E63);
+      this.add.image(x, y - 3, key).setDisplaySize(122, 122);
+      this.helperTexts[key] = makeText(this, x, y + 85, '0%', {
+        fontSize: '28px', color: '#5D4037', fontStyle: 'bold'
       }).setOrigin(0.5);
 
       // Clickable for activation (when charged)
-      this.add.circle(x, y, 90, 0x000000, 0)
+      this.add.circle(x, y, 68, 0x000000, 0)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.activateHelper(key));
     });
@@ -688,7 +696,14 @@ class GameScene extends Phaser.Scene {
         });
       }
       if (type === TILE.STRAWBERRY || type === TILE.BLUEBERRY) {
-        this.ingredients.berries += size;
+        // Якщо рівень задає конкретну ягоду — рахуємо лише її
+        if (this.berryType === 'blueberry') {
+          if (type === TILE.BLUEBERRY) this.ingredients.berries += size;
+        } else if (this.berryType === 'strawberry') {
+          if (type === TILE.STRAWBERRY) this.ingredients.berries += size;
+        } else {
+          this.ingredients.berries += size;
+        }
         const timeBonus = type === TILE.BLUEBERRY ? size * 2 : size;
         const charge = type === TILE.BLUEBERRY ? 4 * size : 3 * size;
         this.timer = Math.min(this.timer + timeBonus, this.levelData.timer_seconds + 50);
