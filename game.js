@@ -160,7 +160,7 @@ class MenuScene extends Phaser.Scene {
       fontSize: '42px', color: '#fff', fontStyle: 'bold'
     }).setOrigin(0.5);
 
-    makeText(this, width/2, height - 40, 'MVP • 10 рівнів • Phaser 3', {
+    makeText(this, width/2, height - 40, 'Механіки • Phaser 3', {
       fontSize: '24px', color: '#A1887F'
     }).setOrigin(0.5);
   }
@@ -186,9 +186,18 @@ class GameScene extends Phaser.Scene {
     this.hintActive = false;
     this.hintTiles = [];
     // Лічильники зібраних інгредієнтів (матч BASIC/BONUS)
-    this.ingredients = { flour: 0, milk: 0, butter: 0, berries: 0 };
-    this.ingredientGoals = { flour: 10, milk: 3, butter: 5, berries: 5 };
+    this.ingredients = { flour: 0, milk: 0, spice: 0, butter: 0, berries: 0 };
+    this.ingredientGoals = { flour: 10, milk: 3, spice: 0, butter: 5, berries: 5 };
     this.allIngredientsComplete = false;
+    // Лічильники цілей для win-умов (кофе, комбо, ярусні торти, перешкоди)
+    this.coffeeCollected = 0;
+    this.cupcakesCollected = 0;
+    this.layeredCakes = 0;
+    this.layeredPrev = 0;
+    this.clearedObstacles = { burnt: 0, ice: 0, box: 0 };
+    this.movesLimit = null;
+    this.movesRemaining = null;
+    this.ingredientRewardEnabled = true;
     this.allowedTools = [];
     // Перешкоди: лід (поверх тайла), коробки (2 стадії), пригоріле
     this.iceCells = new Set();    // "r,c" — лід над замороженим тайлом
@@ -202,16 +211,36 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
+    window.gameScene = this; // дебаг-доступ із консолі
     const levels = this.cache.json.get('levels');
     this.levelData = levels[this.levelIndex] || levels[0];
     this.timer = this.levelData.timer_seconds;
     this.targetCount = this.levelData.target_count;
     this.targetType = this.levelData.target_type;
+    this.targetDetails = this.levelData.target_details || {};
     this.allowedTools = (this.levelData.tools || []).map(n => TILE[n.toUpperCase()]);
+    this.allowedHelpers = this.levelData.allowed_helpers || ['owl', 'fox', 'dragon'];
     this.berryType = this.levelData.berry_type || null;
-    if (this.levelData.ingredient_goals) {
+    this.movesLimit = typeof this.levelData.moves_limit === 'number' ? this.levelData.moves_limit : null;
+    // tile_weights: розподіл тайлів рівня (дефолт — поточний розподіл randomBasic)
+    const defWeights = {
+      flour: 0.16, milk: 0.16, spice: 0.14, butter: 0.14, coffee: 0.10,
+      rollingpin: 0.08, spatula: 0.08, strawberry: 0.07, blueberry: 0.07
+    };
+    this.tileWeights = this.levelData.tile_weights
+      ? { ...defWeights, ...this.levelData.tile_weights }
+      : defWeights;
+    // Ціль guests = лічильники інгредієнтів (target_details); для решти — ingredient_goals
+    if (this.targetType === 'guests') {
+      this.ingredientGoals = { ...this.ingredientGoals, ...this.targetDetails };
+      this.ingredientRewardEnabled = false;
+    } else if (this.levelData.ingredient_goals) {
       this.ingredientGoals = { ...this.ingredientGoals, ...this.levelData.ingredient_goals };
     }
+    // Які інгредієнти показувати в ряду HUD (для guests — лише цільові)
+    this.hudIngredientFields = this.targetType === 'guests'
+      ? ['flour', 'milk', 'spice', 'butter', 'berries'].filter(f => (this.targetDetails[f] || 0) > 0).slice(0, 4)
+      : ['flour', 'milk', 'butter', 'berries'];
 
     // ── LOG: початок рівня ──
     window.gameLog.log('level_start', {
@@ -219,7 +248,7 @@ class GameScene extends Phaser.Scene {
       targetType: this.targetType,
       targetCount: this.targetCount,
       timer: this.timer,
-      obstacles: this.levelData.obstacle_tiles || 0
+      obstacles: (this.levelData.obstacles || []).length
     });
 
     const { width, height } = this.cameras.main;
@@ -276,12 +305,18 @@ class GameScene extends Phaser.Scene {
   startTimer() {
     this.isAnimating = false;
     this.lastMoveTime = this.time.now;
-    this.timerEvent = this.time.addEvent({
-      delay: 1000,
-      callback: this.tickTimer,
-      callbackScope: this,
-      loop: true
-    });
+    if (this.movesLimit) {
+      // Режим «за N ходів»: таймер не йде, лічильник ходів
+      this.movesRemaining = this.movesLimit;
+      this.timerText.setText(`Ходи: ${this.movesRemaining}`);
+    } else {
+      this.timerEvent = this.time.addEvent({
+        delay: 1000,
+        callback: this.tickTimer,
+        callbackScope: this,
+        loop: true
+      });
+    }
     // Підказка, якщо гравець не ходить > 5 сек
     this.idleEvent = this.time.addEvent({
       delay: 1000,
@@ -306,46 +341,48 @@ class GameScene extends Phaser.Scene {
       fontSize: '50px', color: '#5D4037', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
-    // Рядок 2: ціль тортів (великий)
-    this.targetText = makeText(this, width/2, 58, `🎂 0 / ${this.targetCount}`, {
-      fontSize: '80px', color: '#5D4037', fontStyle: 'bold'
+    // Рядок 2: ціль (залежить від target_type)
+    const targetFont = ['combo_target', 'layered_cake', 'clear_obstacles'].includes(this.targetType) ? '56px' : '72px';
+    this.targetText = makeText(this, width/2, 58, '', {
+      fontSize: targetFont, color: '#5D4037', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
-    // Рядок 3: таймер
-    this.timerText = makeText(this, width/2, 142, `⏱ ${this.formatTime(this.timer)}`, {
+    // Рядок 3: таймер (або лічильник ходів)
+    this.timerText = makeText(this, width/2, 142,
+      this.movesLimit ? `Ходи: ${this.movesLimit}` : `⏱ ${this.formatTime(this.timer)}`, {
       fontSize: '64px', color: '#C62828', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
-    // Рядок 4: лічильники інгредієнтів — один рядок 1×4 (іконки 96px)
-    const ingItems = [
-      { key: 'flour',      tex: 'flour',      field: 'flour' },
-      { key: 'milk',       tex: 'milk',       field: 'milk' },
-      { key: 'butter',     tex: 'butter',     field: 'butter' },
-      { key: 'berries',    tex: this.berryType === 'blueberry' ? 'blueberry' : 'strawberry', field: 'berries' }
-    ];
+    // Рядок 4: лічильники інгредієнтів — до 4 слотів за hudIngredientFields
+    const texFor = {
+      flour: 'flour', milk: 'milk', spice: 'spice', butter: 'butter',
+      berries: this.berryType === 'blueberry' ? 'blueberry' : 'strawberry'
+    };
+    const fields = this.hudIngredientFields;
     const colX = [144, 368, 592, 816];
     this.ingTexts = {};
     this.ingIcons = {};
     this.ingChecks = {};
-    ingItems.forEach((item, i) => {
+    fields.forEach((field, i) => {
       const x = colX[i];
-      const icon = this.add.image(x, 260, item.tex).setDisplaySize(96, 96);
-      this.ingIcons[item.field] = icon;
-      this.ingTexts[item.field] = makeText(this, x, 340,
-        `${this.ingredients[item.field]}/${g[item.field]}`,
+      const icon = this.add.image(x, 260, texFor[field]).setDisplaySize(96, 96);
+      this.ingIcons[field] = icon;
+      this.ingTexts[field] = makeText(this, x, 340,
+        `${this.ingredients[field]}/${g[field] || 0}`,
         { fontSize: '48px', color: '#6D4C41', fontStyle: 'bold' }
       ).setOrigin(0.5);
-      this.ingChecks[item.field] = makeText(this, x + 58, 340, '✓', {
+      this.ingChecks[field] = makeText(this, x + 58, 340, '✓', {
         fontSize: '48px', color: '#2E7D32', fontStyle: 'bold'
       }).setOrigin(0, 0.5).setVisible(false);
     });
 
-    // Helpers panel (bottom)
+    // Helpers panel (bottom) — лише дозволені рівнем
     this.helperTexts = {};
-    const helpers = ['owl', 'fox', 'dragon'];
+    const helpers = this.allowedHelpers;
     const helpersY = BOARD_OFFSET_Y + BOARD_H + 70;
+    const spacing = 240;
     helpers.forEach((key, i) => {
-      const x = BOARD_OFFSET_X + 150 + i * 240;
+      const x = BOARD_OFFSET_X + BOARD_W / 2 + (i - (helpers.length - 1) / 2) * spacing;
       const y = helpersY;
       this.add.circle(x, y, 68, 0xFFFFFF).setStrokeStyle(4, 0x8D6E63);
       this.add.image(x, y - 3, key).setDisplaySize(122, 122);
@@ -358,6 +395,9 @@ class GameScene extends Phaser.Scene {
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.activateHelper(key));
     });
+
+    this.updateTargetUI();
+
 
     // Кнопка експорту логу (правий нижній кут)
     const logBtn = makeText(this, width - 20, height - 20, '📋 Log', {
@@ -379,6 +419,7 @@ class GameScene extends Phaser.Scene {
   }
 
   tickTimer() {
+    if (this.movesLimit) return;
     if (this.isAnimating) return;
     this.timer--;
     this.timerText.setText(`⏱ ${this.formatTime(this.timer)}`);
@@ -398,24 +439,31 @@ class GameScene extends Phaser.Scene {
     }
   }
 
+  /** Додає час (не працює в режимі «за ходи») */
+  addTimer(amount, cap) {
+    if (this.movesLimit) return;
+    this.timer = Math.min(this.timer + amount, cap);
+    this.timerText.setText(`⏱ ${this.formatTime(this.timer)}`);
+  }
+
   /**
-   * Random fill — інґредієнти, ягоди, кава та інструменти рівня.
+   * Random fill — за tile_weights рівня (дефолт — збалансований розподіл).
    * Інструменти з'являються лише якщо дозволені рівнем (allowedTools).
-   * Випічка лише зі матчів. Ягоди ~14% сумарно (реалістична ціль 5).
    */
   randomBasic() {
+    const w = this.tileWeights;
     const useRolling = this.allowedTools.includes(TILE.ROLLINGPIN);
     const useSpatula = this.allowedTools.includes(TILE.SPATULA);
     const entries = [
-      { type: TILE.FLOUR,       p: 0.16 },
-      { type: TILE.MILK,        p: 0.16 },
-      { type: TILE.SPICE,       p: 0.14 },
-      { type: TILE.BUTTER,      p: 0.14 },
-      { type: TILE.COFFEE,      p: 0.10 },
-      { type: TILE.ROLLINGPIN,  p: useRolling ? 0.08 : 0 },
-      { type: TILE.SPATULA,     p: useSpatula ? 0.08 : 0 },
-      { type: TILE.STRAWBERRY,  p: 0.07 },
-      { type: TILE.BLUEBERRY,   p: 0.07 }
+      { type: TILE.FLOUR,       p: w.flour },
+      { type: TILE.MILK,        p: w.milk },
+      { type: TILE.SPICE,       p: w.spice },
+      { type: TILE.BUTTER,      p: w.butter },
+      { type: TILE.COFFEE,      p: w.coffee },
+      { type: TILE.ROLLINGPIN,  p: useRolling ? w.rollingpin : 0 },
+      { type: TILE.SPATULA,     p: useSpatula ? w.spatula : 0 },
+      { type: TILE.STRAWBERRY,  p: w.strawberry },
+      { type: TILE.BLUEBERRY,   p: w.blueberry }
     ];
     const total = entries.reduce((s, e) => s + e.p, 0);
     const roll = Math.random() * total;
@@ -473,22 +521,56 @@ class GameScene extends Phaser.Scene {
     return count >= 3;
   }
 
-  /** Розміщує перешкоди рівня з конфігу levels.json */
+  /** Розміщує перешкоди рівня з конфігу levels.json: cells (фіксовані) + count (випадково, без накладок) */
   placeObstacles() {
+    const used = new Set(); // клітинки, вже зайняті перешкодою
+    const isCellFree = (r, c) => {
+      const k = `${r},${c}`;
+      return !used.has(k) && !this.iceCells.has(k) && !this.boxCells.has(k) && !this.burntCells.has(k);
+    };
+    const place = (type, r, c) => {
+      const key = `${r},${c}`;
+      if (type === 'ice') {
+        // лід лише поверх непустого тайла; не на інструменти/каву
+        const t = this.grid[r][c];
+        if (t === TILE.EMPTY || t === TILE.COFFEE || t === TILE.ROLLINGPIN || t === TILE.SPATULA) return;
+        this.iceCells.add(key);
+        used.add(key);
+      } else if (type === 'box') {
+        this.grid[r][c] = TILE.EMPTY;
+        this.boxCells.set(key, 2); // 2 хіти: закрита → відкрита → капкейк
+        used.add(key);
+      } else if (type === 'burnt') {
+        this.grid[r][c] = TILE.EMPTY;
+        this.burntCells.add(key);
+        used.add(key);
+      }
+    };
+
     (this.levelData.obstacles || []).forEach(o => {
+      // Фіксовані клітинки
       (o.cells || []).forEach(([r, c]) => {
         if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) return;
-        const key = `${r},${c}`;
-        if (o.type === 'ice') {
-          if (this.grid[r][c] !== TILE.EMPTY) this.iceCells.add(key);
-        } else if (o.type === 'box') {
-          this.grid[r][c] = TILE.EMPTY;
-          this.boxCells.set(key, 2); // 2 хіти: закрита → відкрита → капкейк
-        } else if (o.type === 'burnt') {
-          this.grid[r][c] = TILE.EMPTY;
-          this.burntCells.add(key);
-        }
+        if (isCellFree(r, c)) place(o.type, r, c);
       });
+      // Випадкова розкладка count (без накладок)
+      if (typeof o.count === 'number' && o.count >= 1) {
+        const candidates = [];
+        for (let r = 0; r < GRID_SIZE; r++) {
+          for (let c = 0; c < GRID_SIZE; c++) {
+            if (!isCellFree(r, c)) continue;
+            if (o.type === 'ice') {
+              const t = this.grid[r][c];
+              if (t === TILE.EMPTY || t === TILE.COFFEE || t === TILE.ROLLINGPIN || t === TILE.SPATULA) continue;
+            }
+            candidates.push([r, c]);
+          }
+        }
+        Phaser.Utils.Array.Shuffle(candidates);
+        for (let i = 0; i < o.count && i < candidates.length; i++) {
+          place(o.type, candidates[i][0], candidates[i][1]);
+        }
+      }
     });
     window.gameLog.log('obstacles', {
       ice: this.iceCells.size,
@@ -687,6 +769,11 @@ class GameScene extends Phaser.Scene {
         const matches = this.findAllMatches();
         if (matches.length > 0) {
           this.moveCount++;
+          if (this.movesLimit) {
+            this.movesRemaining--;
+            this.timerText.setText(`Ходи: ${this.movesRemaining}`);
+            this.timerText.setColor(this.movesRemaining <= 10 ? '#FF1744' : '#C62828');
+          }
           window.gameLog.log('swap', {
             from: [r1, c1], to: [r2, c2],
             valid: true,
@@ -782,6 +869,7 @@ class GameScene extends Phaser.Scene {
         group.forEach(() => this.addCharge('dragon', 6));
       }
       if (type === TILE.SPICE) {
+        this.ingredients.spice += size;
         group.forEach(() => this.addCharge('fox', 6));
       }
       if (type === TILE.BUTTER) {
@@ -803,19 +891,17 @@ class GameScene extends Phaser.Scene {
         }
         const timeBonus = type === TILE.BLUEBERRY ? size * 2 : size;
         const charge = type === TILE.BLUEBERRY ? 4 * size : 3 * size;
-        this.timer = Math.min(this.timer + timeBonus, this.levelData.timer_seconds + 50);
-        this.timerText.setText(`⏱ ${this.formatTime(this.timer)}`);
+        this.addTimer(timeBonus, this.levelData.timer_seconds + 50);
         this.addCharge('owl', charge);
         this.addCharge('fox', charge);
         this.addCharge('dragon', charge);
       }
       if (type === TILE.COFFEE) {
-        this.timer = Math.min(this.timer + size, this.levelData.timer_seconds + 30);
-        this.timerText.setText(`⏱ ${this.formatTime(this.timer)}`);
+        this.coffeeCollected += size;
+        this.addTimer(size, this.levelData.timer_seconds + 30);
       }
       if (type === TILE.ROLLINGPIN || type === TILE.SPATULA) {
-        this.timer = Math.min(this.timer + Math.floor(size / 2), this.levelData.timer_seconds + 20);
-        this.timerText.setText(`⏱ ${this.formatTime(this.timer)}`);
+        this.addTimer(Math.floor(size / 2), this.levelData.timer_seconds + 20);
       }
 
       let spawnType = null;
@@ -848,6 +934,7 @@ class GameScene extends Phaser.Scene {
         }
       } else if (type === TILE.CUPCAKE) {
         cakesGained = 1; // торт не лишається на полі — одразу летить на лічильник
+        this.cupcakesCollected += size; // кожен зібраний капкейк іде в ціль
       } else if (type === TILE.CAKE) {
         cakesGained = size;
       } else if (type === TILE.STRAWBERRY) {
@@ -935,11 +1022,15 @@ class GameScene extends Phaser.Scene {
             if (this.iceCells.has(key)) {
               hitKeys.add(key);
               this.iceCells.delete(key);
+              this.clearedObstacles.ice++;
+              this.updateTargetUI();
               this.burstAt(x, y, 5);
               window.gameLog.log('obstacle_hit', { type: 'ice', r: nr, c: nc });
             } else if (this.burntCells.has(key)) {
               hitKeys.add(key);
               this.burntCells.delete(key);
+              this.clearedObstacles.burnt++;
+              this.updateTargetUI();
               this.burstAt(x, y, 8);
               window.gameLog.log('obstacle_hit', { type: 'burnt', r: nr, c: nc });
             } else if (this.boxCells.has(key)) {
@@ -947,6 +1038,8 @@ class GameScene extends Phaser.Scene {
               const hits = this.boxCells.get(key) - 1;
               if (hits <= 0) {
                 this.boxCells.delete(key);
+                this.clearedObstacles.box++;
+                this.updateTargetUI();
                 this.grid[nr][nc] = TILE.CUPCAKE; // коробка → капкейк (справжній тайл)
                 transforms.push({ r: nr, c: nc });
                 this.burstAt(x, y, 10);
@@ -1107,7 +1200,7 @@ class GameScene extends Phaser.Scene {
           } else {
             this.isAnimating = false;
             this.checkPossibleMoves();
-            this.checkVictory();
+            this.checkEnd();
           }
         });
       }
@@ -1290,6 +1383,7 @@ class GameScene extends Phaser.Scene {
 
   addCharge(helper, amount) {
     const h = this.helpers[helper];
+    if (!h || !this.helperTexts[helper]) return; // неактивний помічник не заряджається
     h.charge = Math.min(h.charge + amount, h.max);
     this.helperTexts[helper].setText(Math.floor(h.charge) + '%');
     if (h.charge >= h.max) {
@@ -1313,9 +1407,9 @@ class GameScene extends Phaser.Scene {
     if (key === 'owl') {
       // Freeze timer 10s
       this.timerText.setColor('#2196F3');
-      this.timerEvent.paused = true;
+      if (this.timerEvent) this.timerEvent.paused = true;
       this.time.delayedCall(10000, () => {
-        this.timerEvent.paused = false;
+        if (this.timerEvent) this.timerEvent.paused = false;
         this.timerText.setColor(this.timer <= 10 ? '#FF1744' : '#C62828');
       });
       this.showToast('🦉 Час заморожено на 10 сек!');
@@ -1336,6 +1430,7 @@ class GameScene extends Phaser.Scene {
             this.grid[r][c] = TILE.EMPTY;
             found = true;
             this.showToast('🐉 Капкейк → Торт!');
+            this.cupcakesCollected++;
             this.applyGravity();
             this.gainCakes(1, pos);
           }
@@ -1346,7 +1441,37 @@ class GameScene extends Phaser.Scene {
   }
 
   updateTargetUI() {
-    this.targetText.setText(`🎂 ${this.cakesCollected} / ${this.targetCount}`);
+    const t = this.targetType;
+    if (t === 'cakes') {
+      this.targetText.setText(`🎂 ${this.cakesCollected} / ${this.targetCount}`);
+    } else if (t === 'coffee') {
+      this.targetText.setText(`☕ ${this.coffeeCollected} / ${this.targetCount}`);
+    } else if (t === 'guests') {
+      const total = this.hudIngredientFields.length;
+      const done = this.hudIngredientFields.filter(f => this.ingredients[f] >= (this.ingredientGoals[f] || 0)).length;
+      this.targetText.setText(`🕯 Гості: ${done} / ${total}`);
+    } else if (t === 'combo_target') {
+      const d = this.targetDetails;
+      this.targetText.setText(`🎂 ${this.cakesCollected} / ${d.cakes || 0} · 🧁 ${this.cupcakesCollected} / ${d.cupcakes || 0}`);
+    } else if (t === 'layered_cake') {
+      const needed = this.targetDetails.cupcakes_needed || 3;
+      const l = Math.floor(this.cupcakesCollected / needed);
+      this.layeredCakes = l;
+      if (l > this.layeredPrev) {
+        this.layeredPrev = l;
+        if (l > 0) this.showToast(`🎂 Багатоярусний торт готовий! (${l}/${this.targetCount})`);
+      }
+      this.targetText.setText(`🎂 ${l} / ${this.targetCount} · 🧁 ${this.cupcakesCollected} / ${this.targetCount * needed}`);
+    } else if (t === 'clear_obstacles') {
+      const d = this.targetDetails;
+      const parts = [];
+      if (d.burnt) parts.push(`🔥 ${this.clearedObstacles.burnt}/${d.burnt}`);
+      if (d.ice) parts.push(`🧊 ${this.clearedObstacles.ice}/${d.ice}`);
+      if (d.box) parts.push(`📦 ${this.clearedObstacles.box}/${d.box}`);
+      this.targetText.setText(parts.join('  '));
+    } else {
+      this.targetText.setText(`🎂 ${this.cakesCollected} / ${this.targetCount}`);
+    }
     this.updateIngredientsUI();
   }
 
@@ -1354,11 +1479,11 @@ class GameScene extends Phaser.Scene {
     if (!this.ingTexts) return;
     const g = this.ingredientGoals;
     const i = this.ingredients;
-    ['flour', 'milk', 'butter', 'berries'].forEach(field => {
+    this.hudIngredientFields.forEach(field => {
       const t = this.ingTexts[field];
       if (!t) return;
-      const done = i[field] >= g[field];
-      t.setText(`${Math.min(i[field], g[field])}/${g[field]}`);
+      const done = i[field] >= (g[field] || 0);
+      t.setText(`${Math.min(i[field], g[field] || 0)}/${g[field] || 0}`);
       t.setColor('#6D4C41');
       if (this.ingChecks[field]) this.ingChecks[field].setVisible(done);
       if (this.ingIcons[field]) {
@@ -1368,11 +1493,12 @@ class GameScene extends Phaser.Scene {
     this.checkIngredientCompletion();
   }
 
-  /** Чи зібрано всі інгредієнти лічильника → +1 торт з анімацією */
+  /** Чи зібрано всі інгредієнти лічильника → +1 торт з анімацією (лише в режимі cakes) */
   checkIngredientCompletion() {
+    if (!this.ingredientRewardEnabled) return;
     const g = this.ingredientGoals;
     const i = this.ingredients;
-    const allDone = ['flour', 'milk', 'butter', 'berries'].every(f => i[f] >= g[f]);
+    const allDone = this.hudIngredientFields.every(f => i[f] >= (g[f] || 0));
     if (allDone && !this.allIngredientsComplete) {
       this.allIngredientsComplete = true;
       this.rewardCakeFromIngredients();
@@ -1414,22 +1540,24 @@ class GameScene extends Phaser.Scene {
   }
 
   resetIngredients() {
-    this.ingredients = { flour: 0, milk: 0, butter: 0, berries: 0 };
+    this.ingredients = { flour: 0, milk: 0, spice: 0, butter: 0, berries: 0 };
     this.allIngredientsComplete = false;
     this.updateIngredientsUI();
   }
 
-  /** Кожен спечений торт → повний перезапуск таймера */
+  /** Кожен спечений торт → повний перезапуск таймера (не в режимі «за ходи») */
   onCakeGained(count) {
-    this.timer = this.levelData.timer_seconds;
-    this.timerText.setText(`⏱ ${this.formatTime(this.timer)}`);
-    this.timerText.setColor(this.timer <= 10 ? '#FF1744' : '#C62828');
+    if (!this.movesLimit) {
+      this.timer = this.levelData.timer_seconds;
+      this.timerText.setText(`⏱ ${this.formatTime(this.timer)}`);
+      this.timerText.setColor(this.timer <= 10 ? '#FF1744' : '#C62828');
+      this.showToast('⏱ Час оновлено!');
+    }
     window.gameLog.log('timer_reset', {
       count,
       cakesNow: this.cakesCollected,
       resetTo: this.timer
     });
-    this.showToast('⏱ Час оновлено!');
   }
 
   /** Торт не лишається на полі — одразу летить на лічильник тортів */
@@ -1519,21 +1647,29 @@ class GameScene extends Phaser.Scene {
     const objs = [];
     const addObj = (o) => { objs.push(o); return o; };
 
+    const name = this.levelData.name;
+    const targetText = this.taskDescription();
+
     addObj(this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.6).setDepth(30));
-    addObj(makeText(this, width/2, height/2 - 330, `Рівень ${this.levelData.level}`, {
-      fontSize: '68px', color: '#FFD700', fontStyle: 'bold'
+    addObj(makeText(this, width/2, height/2 - 360, name ? `«${name}»` : `Рівень ${this.levelData.level}`, {
+      fontSize: '58px', color: '#FFD700', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(31));
-    addObj(this.add.image(width/2, height/2 - 135, 'cake').setDisplaySize(315, 315).setDepth(31));
-    addObj(makeText(this, width/2, height/2 + 75, `Спечіть ${this.targetCount} 🎂`, {
-      fontSize: '80px', color: '#fff', fontStyle: 'bold'
+    if (name) {
+      addObj(makeText(this, width/2, height/2 - 300, `Рівень ${this.levelData.level}`, {
+        fontSize: '36px', color: '#FFE082'
+      }).setOrigin(0.5).setDepth(31));
+    }
+    addObj(this.add.image(width/2, height/2 - 110, 'cake').setDisplaySize(285, 285).setDepth(31));
+    addObj(makeText(this, width/2, height/2 + 75, targetText, {
+      fontSize: '66px', color: '#fff', fontStyle: 'bold', align: 'center'
     }).setOrigin(0.5).setDepth(31));
-    addObj(makeText(this, width/2, height/2 + 170, 'Збирайте інгредієнти та складайте комбінації', {
+    addObj(makeText(this, width/2, height/2 + 175, 'Збирайте інгредієнти та складайте комбінації', {
       fontSize: '36px', color: '#ddd'
     }).setOrigin(0.5).setDepth(31));
 
-    const btn = addObj(this.add.rectangle(width/2, height/2 + 285, 495, 120, 0x4CAF50)
+    const btn = addObj(this.add.rectangle(width/2, height/2 + 290, 495, 120, 0x4CAF50)
       .setInteractive({ useHandCursor: true }).setDepth(31));
-    addObj(makeText(this, width/2, height/2 + 285, 'Почати', {
+    addObj(makeText(this, width/2, height/2 + 290, 'Почати', {
       fontSize: '50px', color: '#fff', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(32));
     btn.on('pointerdown', () => {
@@ -1542,11 +1678,59 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  /** Текст завдання за target_type */
+  taskDescription() {
+    const t = this.targetType;
+    if (t === 'cakes') return `Спечіть ${this.targetCount} 🎂`;
+    if (t === 'coffee') return `Зберіть ${this.targetCount} ☕`;
+    if (t === 'guests') {
+      const d = this.targetDetails;
+      const labels = {
+        flour: 'борошно', milk: 'молоко', spice: 'спеції', butter: 'масло', berries: 'ягоди'
+      };
+      return 'Гостям: ' + Object.keys(d).filter(k => d[k] > 0).map(k => `${labels[k] || k} ${d[k]}`).join(', ');
+    }
+    if (t === 'combo_target') return `Спечіть ${this.targetDetails.cakes} 🎂 та ${this.targetDetails.cupcakes} 🧁`;
+    if (t === 'layered_cake') return `Складіть ${this.targetCount} багатоярусних 🎂`;
+    if (t === 'clear_obstacles') return 'Приберіть усі перешкоди';
+    return `Спечіть ${this.targetCount} 🎂`;
+  }
+
+  /** Чи виконано умову перемоги за поточним target_type */
+  targetMet() {
+    const t = this.targetType;
+    if (t === 'cakes') return this.cakesCollected >= this.targetCount;
+    if (t === 'coffee') return this.coffeeCollected >= this.targetCount;
+    if (t === 'guests') return this.hudIngredientFields.every(f => this.ingredients[f] >= (this.ingredientGoals[f] || 0));
+    if (t === 'combo_target') {
+      const d = this.targetDetails;
+      return this.cakesCollected >= (d.cakes || 0) && this.cupcakesCollected >= (d.cupcakes || 0);
+    }
+    if (t === 'layered_cake') {
+      const needed = this.targetDetails.cupcakes_needed || 3;
+      return Math.floor(this.cupcakesCollected / needed) >= this.targetCount;
+    }
+    if (t === 'clear_obstacles') {
+      const d = this.targetDetails;
+      return Object.keys(d).every(k => this.clearedObstacles[k] >= d[k]);
+    }
+    return this.cakesCollected >= this.targetCount;
+  }
+
   checkVictory() {
-    if (this.cakesCollected >= this.targetCount) {
-      this.timerEvent.remove();
+    if (this.targetMet()) {
+      if (this.timerEvent) this.timerEvent.remove();
       this.showVictory();
     }
+  }
+
+  /** Після завершення каскаду: поразка за ходами або перевірка перемоги */
+  checkEnd() {
+    if (this.movesLimit && this.movesRemaining <= 0) {
+      this.showDefeat();
+      return;
+    }
+    this.checkVictory();
   }
 
   showToast(msg) {
@@ -1591,13 +1775,17 @@ class GameScene extends Phaser.Scene {
       .setInteractive({ useHandCursor: true })
       .setDepth(31)
       .on('pointerdown', () => {
-        if (this.levelIndex < 9) {
+        const levels = this.cache.json.get('levels');
+        if (this.levelIndex < levels.length - 1) {
           this.scene.restart({ levelIndex: this.levelIndex + 1 });
         } else {
           this.scene.start('Menu');
         }
       });
-    makeText(this, width/2, height/2 + 100, this.levelIndex < 9 ? 'Наступний рівень' : 'В меню', {
+    makeText(this, width/2, height/2 + 100, (() => {
+      const levels = this.cache.json.get('levels');
+      return this.levelIndex < levels.length - 1 ? 'Наступний рівень' : 'В меню';
+    })(), {
       fontSize: '50px', color: '#fff'
     }).setOrigin(0.5).setDepth(32);
   }
@@ -1623,7 +1811,7 @@ class GameScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
     this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.6).setDepth(30);
-    makeText(this, width/2, height/2 - 100, '⏰ Time\'s Up!', {
+    makeText(this, width/2, height/2 - 100, this.movesLimit ? '❌ Ходи закінчились!' : "⏰ Time's Up!", {
       fontSize: '80px', color: '#FF5252', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(31);
 

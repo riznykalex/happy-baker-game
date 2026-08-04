@@ -1,185 +1,121 @@
 [
   {
     "level": 0,
+    "name": "Тестовий полігон",
     "timer_seconds": 120,
+    "moves_limit": null,
     "target_type": "cakes",
     "target_count": 3,
-    "obstacle_tiles": 0,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
-    "tools": ["rollingpin", "spatula"],
     "obstacles": [
       { "type": "ice", "cells": [[2,2],[3,3],[2,4]] },
       { "type": "box", "cells": [[1,5],[4,1],[4,5]] },
       { "type": "burnt", "cells": [[3,1],[1,1],[5,5]] }
     ],
+    "tools": ["rollingpin", "spatula"],
+    "berry_type": "strawberry",
+    "ingredient_goals": { "flour": 10, "milk": 3, "butter": 5, "berries": 5 },
     "description": "Тестовий рівень 0: лід, коробки і пригорілі"
   },
   {
     "level": 1,
+    "name": "Кавовий спринт",
     "timer_seconds": 120,
-    "target_type": "cakes",
-    "target_count": 5,
-    "obstacle_tiles": 0,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
-    "description": "Відкриття кафе: спечи 5 тортів з борошна, молока, масла та спецій",
-    "ingredient_goals": {
-      "flour": 10,
-      "milk": 3,
-      "butter": 5,
-      "berries": 5
+    "moves_limit": null,
+    "target_type": "coffee",
+    "target_count": 8,
+    "tile_weights": {
+      "flour": 0.14, "milk": 0.14, "spice": 0.12, "butter": 0.12,
+      "coffee": 0.20, "rollingpin": 0.06, "spatula": 0.06,
+      "strawberry": 0.08, "blueberry": 0.08
     },
-    "tools": []
+    "tools": ["rollingpin", "spatula"],
+    "berry_type": "strawberry",
+    "allowed_helpers": ["owl", "fox", "dragon"],
+    "description": "Тест win-умови coffee: збери 8 чашок кави"
   },
   {
     "level": 2,
+    "name": "Молочна ріка",
     "timer_seconds": 120,
+    "moves_limit": null,
     "target_type": "guests",
-    "target_count": 10,
-    "target_details": {
-      "milk": 10,
-      "flour": 10
+    "target_details": { "milk": 15, "flour": 12 },
+    "tile_weights": {
+      "flour": 0.18, "milk": 0.20, "spice": 0.12, "butter": 0.12,
+      "coffee": 0.08, "rollingpin": 0.06, "spatula": 0.06,
+      "strawberry": 0.09, "blueberry": 0.09
     },
-    "obstacle_tiles": 0,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
-    "tools": ["rollingpin"],
-    "description": "Ранкові гості: зберіть молоко і борошно. Ягоди дають бонус часу"
+    "tools": ["rollingpin", "spatula"],
+    "berry_type": "strawberry",
+    "allowed_helpers": ["owl", "fox"],
+    "description": "Тест win-умови guests + обмеження помічників (без дракончика)"
   },
   {
     "level": 3,
+    "name": "Десертний набір",
     "timer_seconds": 120,
-    "target_type": "clean_burnt",
-    "target_count": 4,
-    "obstacle_tiles": 4,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
-    "tools": ["spatula"],
-    "description": "Кухонна халепа: приберіть 4 пригорілих печива"
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": { "cakes": 4, "cupcakes": 6 },
+    "tile_weights": {
+      "flour": 0.15, "milk": 0.15, "spice": 0.13, "butter": 0.13,
+      "coffee": 0.10, "rollingpin": 0.07, "spatula": 0.07,
+      "strawberry": 0.10, "blueberry": 0.10
+    },
+    "tools": ["rollingpin", "spatula"],
+    "berry_type": "strawberry",
+    "allowed_helpers": ["owl", "fox", "dragon"],
+    "description": "Тест combo_target: 4 торти + 6 капкейків"
   },
   {
     "level": 4,
+    "name": "Весільний заказ",
     "timer_seconds": 120,
-    "target_type": "coffee",
-    "target_count": 8,
-    "obstacle_tiles": 0,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
+    "moves_limit": null,
+    "target_type": "layered_cake",
+    "target_count": 2,
+    "target_details": { "cupcakes_needed": 3 },
+    "tile_weights": {
+      "flour": 0.15, "milk": 0.15, "spice": 0.13, "butter": 0.13,
+      "coffee": 0.10, "rollingpin": 0.07, "spatula": 0.07,
+      "strawberry": 0.10, "blueberry": 0.10
+    },
     "tools": ["rollingpin", "spatula"],
-    "description": "Еспресо-спринт: 8 чашок кави. Лохина рятує час!"
+    "berry_type": "strawberry",
+    "allowed_helpers": ["owl", "fox", "dragon"],
+    "description": "Тест layered_cake: 3 капкейки → 1 багатоярусний торт, треба 2"
   },
   {
     "level": 5,
+    "name": "Прибирання кухні",
     "timer_seconds": 120,
-    "target_type": "layered_cake",
-    "target_count": 1,
-    "target_details": {
-      "cupcakes_needed": 3
-    },
-    "obstacle_tiles": 0,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
+    "moves_limit": null,
+    "target_type": "clear_obstacles",
+    "target_details": { "burnt": 3, "ice": 2 },
+    "obstacles": [
+      { "type": "burnt", "count": 3 },
+      { "type": "ice", "count": 2 }
     ],
+    "tile_weights": {
+      "flour": 0.16, "milk": 0.16, "spice": 0.14, "butter": 0.14,
+      "coffee": 0.08, "rollingpin": 0.06, "spatula": 0.06,
+      "strawberry": 0.10, "blueberry": 0.10
+    },
     "tools": ["rollingpin", "spatula"],
-    "description": "Весільний заказ: зберіть 3 капкейки в один торт. Масло — секрет ніжності"
+    "berry_type": "strawberry",
+    "allowed_helpers": ["owl", "fox", "dragon"],
+    "description": "Тест clear_obstacles + випадкова розкладка count: прибери 3 пригорілих і 2 льоди"
   },
   {
     "level": 6,
+    "name": "Майстерність ходів",
     "timer_seconds": 120,
-    "berry_type": "blueberry",
-    "target_type": "animal_treats",
-    "target_count": 15,
-    "target_details": {
-      "spices": 15,
-      "flour": 15
-    },
-    "obstacle_tiles": 0,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
+    "moves_limit": 25,
+    "target_type": "cakes",
+    "target_count": 4,
     "tools": ["rollingpin", "spatula"],
-    "description": "День смаколиків для звірят: спеції, борошно і ягідний декор"
-  },
-  {
-    "level": 7,
-    "timer_seconds": 120,
-    "target_type": "combo_target",
-    "target_count": 3,
-    "target_details": {
-      "cakes": 3,
-      "cupcakes": 8
-    },
-    "obstacle_tiles": 0,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
-    "tools": ["rollingpin", "spatula"],
-    "description": "Фестиваль десертів: 3 торти + 8 капкейків"
-  },
-  {
-    "level": 8,
-    "timer_seconds": 120,
-    "berry_type": "blueberry",
-    "target_type": "burnt_night",
-    "target_count": 6,
-    "obstacle_tiles": 6,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
-    "tools": ["rollingpin", "spatula"],
-    "description": "Нічна зміна: 6 пригорілих. Сова заморозить час"
-  },
-  {
-    "level": 9,
-    "timer_seconds": 120,
-    "berry_type": "blueberry",
-    "target_type": "vip_guests",
-    "target_count": 1,
-    "obstacle_tiles": 2,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
-    "tools": ["rollingpin", "spatula"],
-    "description": "VIP: особливе комбо з масла, лохини та полуниці"
-  },
-  {
-    "level": 10,
-    "timer_seconds": 120,
-    "target_type": "grand_cake",
-    "target_count": 1,
-    "obstacle_tiles": 8,
-    "allowed_helpers": [
-      "owl",
-      "fox",
-      "dragon"
-    ],
-    "tools": ["rollingpin", "spatula"],
-    "description": "Королівський банкет: гігантський торт з усіх інгредієнтів"
+    "berry_type": "strawberry",
+    "allowed_helpers": ["owl", "fox", "dragon"],
+    "description": "Тест режиму «за ходи»: спечи 4 торти за 25 ходів"
   }
 ]
