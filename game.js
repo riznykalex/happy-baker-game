@@ -285,6 +285,7 @@ class GameScene extends Phaser.Scene {
     const colX = [144, 368, 592, 816];
     this.ingTexts = {};
     this.ingIcons = {};
+    this.ingChecks = {};
     ingItems.forEach((item, i) => {
       const x = colX[i];
       const icon = this.add.image(x, 250, item.tex).setDisplaySize(96, 96);
@@ -293,6 +294,9 @@ class GameScene extends Phaser.Scene {
         `${this.ingredients[item.field]}/${g[item.field]}`,
         { fontSize: '48px', color: '#6D4C41', fontStyle: 'bold' }
       ).setOrigin(0.5);
+      this.ingChecks[item.field] = this.add.text(x + 58, 316, '✓', {
+        fontSize: '48px', color: '#2E7D32', fontStyle: 'bold'
+      }).setOrigin(0, 0.5).setVisible(false);
     });
 
     // Helpers panel (bottom)
@@ -1035,10 +1039,11 @@ class GameScene extends Phaser.Scene {
       const t = this.ingTexts[field];
       if (!t) return;
       const done = i[field] >= g[field];
-      t.setText(`${Math.min(i[field], g[field])}/${g[field]}${done ? ' ✓' : ''}`);
-      t.setColor(done ? '#2E7D32' : '#6D4C41');
+      t.setText(`${Math.min(i[field], g[field])}/${g[field]}`);
+      t.setColor('#6D4C41');
+      if (this.ingChecks[field]) this.ingChecks[field].setVisible(done);
       if (this.ingIcons[field]) {
-        this.ingIcons[field].setTint(done ? 0x81C784 : 0xFFFFFF);
+        this.ingIcons[field].setTint(done ? 0x9E9E9E : 0xFFFFFF);
       }
     });
     this.checkIngredientCompletion();
