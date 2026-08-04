@@ -10,7 +10,7 @@ const BOARD_H = GRID_SIZE * TILE_SIZE; // 896
 const BOARD_OFFSET_X = 32;
 const BOARD_OFFSET_Y = 376;     // місце під HUD зверху
 const GAME_W = BOARD_OFFSET_X * 2 + BOARD_W; // 960
-const GAME_H = BOARD_OFFSET_Y + BOARD_H + 200; // ~1472 (хелпери знизу)
+const GAME_H = BOARD_OFFSET_Y + BOARD_H + 250; // ~1522 (хелпери знизу)
 
 // Ігровий шрифт (кирилиця) — Balsamiq Sans із Google Fonts
 const FONT = "'Balsamiq Sans', 'Comfortaa', 'Segoe UI', sans-serif";
@@ -328,13 +328,13 @@ class GameScene extends Phaser.Scene {
     // Helpers panel (bottom)
     this.helperTexts = {};
     const helpers = ['owl', 'fox', 'dragon'];
-    const helpersY = BOARD_OFFSET_Y + BOARD_H + 80;
+    const helpersY = BOARD_OFFSET_Y + BOARD_H + 70;
     helpers.forEach((key, i) => {
       const x = BOARD_OFFSET_X + 150 + i * 240;
       const y = helpersY;
       this.add.circle(x, y, 68, 0xFFFFFF).setStrokeStyle(4, 0x8D6E63);
       this.add.image(x, y - 3, key).setDisplaySize(122, 122);
-      this.helperTexts[key] = makeText(this, x, y + 85, '0%', {
+      this.helperTexts[key] = makeText(this, x, y + 80, '0%', {
         fontSize: '28px', color: '#5D4037', fontStyle: 'bold'
       }).setOrigin(0.5);
 
@@ -1379,7 +1379,7 @@ class GameScene extends Phaser.Scene {
 const config = {
   type: Phaser.AUTO,
   width: GAME_W,   // 960
-  height: GAME_H,  // ~1527
+  height: GAME_H,  // ~1522
   parent: 'game-container',
   backgroundColor: '#f5e6c8',
   scene: [BootScene, MenuScene, GameScene],
