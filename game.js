@@ -235,6 +235,19 @@ class GameScene extends Phaser.Scene {
     // HUD
     this.createHUD();
 
+    // Текстура м'якої «іскри» для анімації магічного перетворення
+    if (!this.textures.exists('spark')) {
+      const g = this.add.graphics();
+      g.fillStyle(0xFFFFFF, 1);
+      g.fillCircle(16, 16, 16);
+      g.fillStyle(0xFFFFFF, 0.5);
+      g.fillCircle(16, 16, 11);
+      g.fillStyle(0xFFFFFF, 0.18);
+      g.fillCircle(16, 16, 6);
+      g.generateTexture('spark', 32, 32);
+      g.destroy();
+    }
+
     // Init grid
     this.initGrid();
     this.drawGrid();
@@ -819,9 +832,11 @@ class GameScene extends Phaser.Scene {
       onComplete: () => {
         toDestroy.forEach(t => t.destroy());
         // Ставимо spawn-и
+        const transforms = [];
         spawns.forEach(s => {
           if (this.grid[s.r][s.c] === TILE.EMPTY) {
             this.grid[s.r][s.c] = s.type;
+            transforms.push({ r: s.r, c: s.c });
           }
         });
         // Інструменти: масова конвертація поля
@@ -832,6 +847,7 @@ class GameScene extends Phaser.Scene {
             for (let c = 0; c < GRID_SIZE; c++) {
               if (this.grid[r][c] === TILE.FLOUR) {
                 this.grid[r][c] = TILE.COOKIE;
+                transforms.push({ r, c });
                 n++;
               }
             }
@@ -845,6 +861,7 @@ class GameScene extends Phaser.Scene {
             for (let c = 0; c < GRID_SIZE; c++) {
               if (this.grid[r][c] === TILE.COOKIE) {
                 this.grid[r][c] = TILE.CUPCAKE;
+                transforms.push({ r, c });
                 n++;
               }
             }
@@ -853,6 +870,7 @@ class GameScene extends Phaser.Scene {
           this.showToast(`🍳 Печиво → капкейк (${n})`);
         }
         this._pendingConvert = null;
+        this._pendingTransforms = transforms;
         this.applyGravity();
       }
     });
@@ -896,6 +914,16 @@ class GameScene extends Phaser.Scene {
   }
 
   applyGravity() {
+    // Куди опустяться магічні перетворення після гравітації (рахуємо до зміни сітки)
+    const transforms = (this._pendingTransforms || []).map(t => {
+      let below = 0;
+      for (let rr = t.r + 1; rr < GRID_SIZE; rr++) {
+        if (this.grid[rr][t.c] !== TILE.EMPTY) below++;
+      }
+      return { r: GRID_SIZE - 1 - below, c: t.c };
+    });
+    this._pendingTransforms = null;
+
     let moved = false;
     for (let c = 0; c < GRID_SIZE; c++) {
       let emptyRow = GRID_SIZE - 1;
@@ -918,6 +946,13 @@ class GameScene extends Phaser.Scene {
 
     this.drawGrid(); // redraw after gravity (simple for MVP)
 
+    // Магічне перетворення: pop + кільце + іскри на новостворених тайлах
+    transforms.forEach((t, i) => {
+      if (t.r >= 0 && t.r < GRID_SIZE && this.tiles[t.r] && this.tiles[t.r][t.c]) {
+        this.playReveal(t.r, t.c, Math.min(i * 25, 300));
+      }
+    });
+
     // Check for new matches (cascades)
     this.time.delayedCall(220, () => {
       const newMatches = this.findAllMatches();
@@ -936,6 +971,55 @@ class GameScene extends Phaser.Scene {
           }
         });
       }
+    });
+  }
+
+  /** Магічне перетворення: тайл пружно виростає + сяюче кільце + іскри */
+  playReveal(r, c, delay) {
+    const container = this.tiles[r][c];
+    if (!container) return;
+    const x = BOARD_OFFSET_X + c * TILE_SIZE + TILE_SIZE / 2;
+    const y = BOARD_OFFSET_Y + r * TILE_SIZE + TILE_SIZE / 2;
+    const d = delay || 0;
+
+    // Pop: пружний стрибок з нуля (без затримки — тайл міг зникнути в каскаді)
+    container.setScale(0);
+    this.tweens.add({
+      targets: container,
+      scale: 1,
+      duration: 200,
+      ease: 'Back.easeOut'
+    });
+
+    // Сяюче кільце, що розширюється й тане
+    const ring = this.add.circle(x, y, TILE_SIZE * 0.34, 0xFFE066, 0)
+      .setStrokeStyle(8, 0xFFD54F, 0.95)
+      .setDepth(15);
+    this.tweens.add({
+      targets: ring,
+      scale: 2,
+      alpha: 0,
+      duration: 430,
+      delay: d,
+      ease: 'Cubic.easeOut',
+      onComplete: () => ring.destroy()
+    });
+
+    // Вибух магічних іскор
+    const emitter = this.add.particles(x, y, 'spark', {
+      speed: { min: 30, max: 140 },
+      angle: { min: 0, max: 360 },
+      scale: { start: 0.9, end: 0 },
+      alpha: { start: 1, end: 0 },
+      lifespan: 550,
+      emitting: false,
+      blendMode: Phaser.BlendModes.ADD
+    }).setDepth(15);
+    this.time.delayedCall(d, () => {
+      if (!emitter.destroyed) emitter.explode(7);
+    });
+    this.time.delayedCall(d + 750, () => {
+      if (!emitter.destroyed) emitter.destroy();
     });
   }
 
