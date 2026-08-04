@@ -1871,17 +1871,17 @@ class GameScene extends Phaser.Scene {
       fontSize: '60px', color: '#FFD700', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(41));
 
-    const cols = 8, startX = 150, startY = 150, dx = 84, dy = 88, r = 31;
+    const cols = 7, startX = 84, startY = 299, dx = 132, dy = 132, r = 62;
     levels.forEach((lv, idx) => {
       const x = startX + (idx % cols) * dx;
       const y = startY + Math.floor(idx / cols) * dy;
       const done = this.completedLevels.has(lv.level);
       const circle = addObj(this.add.circle(x, y, r, done ? 0x4CAF50 : 0x9E9E9E, 0.95)
-        .setStrokeStyle(2, 0xFFFFFF, 0.4)
+        .setStrokeStyle(3, 0xFFFFFF, 0.4)
         .setInteractive({ useHandCursor: true })
         .setDepth(41));
       addObj(makeText(this, x, y, String(lv.level), {
-        fontSize: '30px', color: '#fff', fontStyle: 'bold'
+        fontSize: '44px', color: '#fff', fontStyle: 'bold'
       }).setOrigin(0.5).setDepth(42));
       circle.on('pointerdown', () => {
         closeOverlay();
