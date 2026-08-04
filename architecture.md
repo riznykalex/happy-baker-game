@@ -1,4 +1,4 @@
-# Architecture — «Кафе: Торти за часом»
+# Architecture — «Кафе чарівних тортів»
 
 Cozy Match-3 RPG (MVP). Web-гра на **Phaser 3** + HTML5 Canvas.
 

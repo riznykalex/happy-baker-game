@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Простий HTTP-сервер для гри «Кафе: Торти за часом»
+Простий HTTP-сервер для гри «Кафе чарівних тортів»
 Запуск: python3 server.py
 Потім відкрий у браузері: http://localhost:8080
 """
@@ -32,7 +32,7 @@ if __name__ == "__main__":
     
     with socketserver.TCPServer(("", PORT), Handler) as httpd:
         print("=" * 50)
-        print("  🥐 Кафе: Торти за часом — локальний сервер")
+        print("  🥐 Кафе чарівних тортів — локальний сервер")
         print("=" * 50)
         print(f"  Сервер запущено: http://localhost:{PORT}")
         print(f"  Папка: {DIRECTORY}")

@@ -1,5 +1,5 @@
 /**
- * Match-3 RPG «Кафе: Торти за часом» — MVP Core
+ * Match-3 RPG «Кафе чарівних тортів» — MVP Core
  * Phaser 3 implementation following the final TZ
  */
 
@@ -145,13 +145,9 @@ class MenuScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
     this.add.image(width/2, height/2, 'bg').setDisplaySize(width, height).setAlpha(0.7);
     
-    makeText(this, width/2, 120, '🥐 Кафе: Торти за часом 🎂', {
+    makeText(this, width/2, 120, '🥐 Кафе чарівних тортів 🎂', {
       fontSize: '54px', color: '#5D4037',
       stroke: '#fff', strokeThickness: 5
-    }).setOrigin(0.5);
-
-    makeText(this, width/2, 180, 'Cozy Match-3 • Борошно, масло, ягоди', {
-      fontSize: '28px', color: '#8D6E63'
     }).setOrigin(0.5);
 
     const startBtn = this.add.rectangle(width/2, 340, 375, 105, 0xE67E22)
