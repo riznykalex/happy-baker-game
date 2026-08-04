@@ -8,9 +8,9 @@ const GRID_SIZE = 7;
 const BOARD_W = GRID_SIZE * TILE_SIZE; // 896
 const BOARD_H = GRID_SIZE * TILE_SIZE; // 896
 const BOARD_OFFSET_X = 32;
-const BOARD_OFFSET_Y = 700;     // місце під великий HUD зверху
+const BOARD_OFFSET_Y = 520;     // місце під великий HUD зверху
 const GAME_W = BOARD_OFFSET_X * 2 + BOARD_W; // 960
-const GAME_H = BOARD_OFFSET_Y + BOARD_H + 340; // ~1936 (хелпери знизу)
+const GAME_H = BOARD_OFFSET_Y + BOARD_H + 255; // ~1671 (хелпери знизу)
 
 // ──────────────────────────────────────────────
 // Game Logger — для аналізу геймплею та балансу
@@ -137,26 +137,26 @@ class MenuScene extends Phaser.Scene {
     this.add.image(width/2, height/2, 'bg').setDisplaySize(width, height).setAlpha(0.7);
     
     this.add.text(width/2, 120, '🥐 Кафе: Торти за часом 🎂', {
-      fontSize: '72px', fontFamily: 'Segoe UI', color: '#5D4037',
-      stroke: '#fff', strokeThickness: 6
+      fontSize: '54px', fontFamily: 'Segoe UI', color: '#5D4037',
+      stroke: '#fff', strokeThickness: 5
     }).setOrigin(0.5);
 
-    this.add.text(width/2, 210, 'Cozy Match-3 • Борошно, масло, ягоди', {
-      fontSize: '36px', color: '#8D6E63'
+    this.add.text(width/2, 180, 'Cozy Match-3 • Борошно, масло, ягоди', {
+      fontSize: '28px', color: '#8D6E63'
     }).setOrigin(0.5);
 
-    const startBtn = this.add.rectangle(width/2, 380, 500, 140, 0xE67E22)
+    const startBtn = this.add.rectangle(width/2, 340, 375, 105, 0xE67E22)
       .setInteractive({ useHandCursor: true })
       .on('pointerdown', () => this.scene.start('Game', { levelIndex: 0 }))
       .on('pointerover', () => startBtn.setFillStyle(0xF39C12))
       .on('pointerout', () => startBtn.setFillStyle(0xE67E22));
 
-    this.add.text(width/2, 380, 'Почати гру', {
-      fontSize: '56px', color: '#fff', fontStyle: 'bold'
+    this.add.text(width/2, 340, 'Почати гру', {
+      fontSize: '42px', color: '#fff', fontStyle: 'bold'
     }).setOrigin(0.5);
 
     this.add.text(width/2, height - 40, 'MVP • 10 рівнів • Phaser 3', {
-      fontSize: '30px', color: '#A1887F'
+      fontSize: '24px', color: '#A1887F'
     }).setOrigin(0.5);
   }
 }
@@ -256,26 +256,26 @@ class GameScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
     const g = this.ingredientGoals;
 
-    // Окремий блок HUD (0..700)
-    this.add.rectangle(width/2, 350, width - 16, 700, 0xFFFFFF, 0.95)
-      .setStrokeStyle(6, 0xD7CCC8);
+    // Окремий блок HUD (0..500)
+    this.add.rectangle(width/2, 250, width - 16, 500, 0xFFFFFF, 0.95)
+      .setStrokeStyle(5, 0xD7CCC8);
 
     // Рядок 1: рівень
-    this.levelText = this.add.text(width/2, 8, `Рівень ${this.levelData.level}`, {
-      fontSize: '66px', color: '#5D4037', fontStyle: 'bold'
+    this.levelText = this.add.text(width/2, 6, `Рівень ${this.levelData.level}`, {
+      fontSize: '50px', color: '#5D4037', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
     // Рядок 2: ціль тортів (великий)
-    this.targetText = this.add.text(width/2, 92, `🎂 0 / ${this.targetCount}`, {
-      fontSize: '108px', color: '#5D4037', fontStyle: 'bold'
+    this.targetText = this.add.text(width/2, 64, `🎂 0 / ${this.targetCount}`, {
+      fontSize: '80px', color: '#5D4037', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
     // Рядок 3: таймер
-    this.timerText = this.add.text(width/2, 216, `⏱ ${this.formatTime(this.timer)}`, {
-      fontSize: '84px', color: '#C62828', fontStyle: 'bold'
+    this.timerText = this.add.text(width/2, 152, `⏱ ${this.formatTime(this.timer)}`, {
+      fontSize: '64px', color: '#C62828', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
-    // Рядок 4: лічильники інгредієнтів — сітка 2×2 (іконки 144px)
+    // Рядок 4: лічильники інгредієнтів — сітка 2×2 (іконки 108px)
     const ingItems = [
       { key: 'flour',      tex: 'flour',      field: 'flour' },
       { key: 'milk',       tex: 'milk',       field: 'milk' },
@@ -283,43 +283,43 @@ class GameScene extends Phaser.Scene {
       { key: 'berries',    tex: 'strawberry', field: 'berries' }
     ];
     const colX = [240, 720];
-    const rowY = [330, 540];
+    const rowY = [250, 390];
     this.ingTexts = {};
     this.ingIcons = {};
     ingItems.forEach((item, i) => {
       const x = colX[i % 2];
       const y = rowY[Math.floor(i / 2)];
-      const icon = this.add.image(x, y, item.tex).setDisplaySize(144, 144);
+      const icon = this.add.image(x, y, item.tex).setDisplaySize(108, 108);
       this.ingIcons[item.field] = icon;
-      this.ingTexts[item.field] = this.add.text(x, y + 100,
+      this.ingTexts[item.field] = this.add.text(x, y + 75,
         `${this.ingredients[item.field]}/${g[item.field]}`,
-        { fontSize: '72px', color: '#6D4C41', fontStyle: 'bold' }
+        { fontSize: '54px', color: '#6D4C41', fontStyle: 'bold' }
       ).setOrigin(0.5);
     });
 
     // Helpers panel (bottom)
     this.helperTexts = {};
     const helpers = ['owl', 'fox', 'dragon'];
-    const helpersY = BOARD_OFFSET_Y + BOARD_H + 130;
+    const helpersY = BOARD_OFFSET_Y + BOARD_H + 100;
     helpers.forEach((key, i) => {
       const x = BOARD_OFFSET_X + 150 + i * 300;
       const y = helpersY;
-      this.add.circle(x, y, 120, 0xFFFFFF).setStrokeStyle(6, 0x8D6E63);
-      this.add.image(x, y - 4, key).setDisplaySize(216, 216);
-      this.helperTexts[key] = this.add.text(x, y + 150, '0%', {
-        fontSize: '48px', color: '#5D4037', fontStyle: 'bold'
+      this.add.circle(x, y, 90, 0xFFFFFF).setStrokeStyle(5, 0x8D6E63);
+      this.add.image(x, y - 3, key).setDisplaySize(162, 162);
+      this.helperTexts[key] = this.add.text(x, y + 112, '0%', {
+        fontSize: '36px', color: '#5D4037', fontStyle: 'bold'
       }).setOrigin(0.5);
 
       // Clickable for activation (when charged)
-      this.add.circle(x, y, 120, 0x000000, 0)
+      this.add.circle(x, y, 90, 0x000000, 0)
         .setInteractive({ useHandCursor: true })
         .on('pointerdown', () => this.activateHelper(key));
     });
 
     // Кнопка експорту логу (правий нижній кут)
     const logBtn = this.add.text(width - 20, height - 20, '📋 Log', {
-      fontSize: '24px', color: '#8D6E63', backgroundColor: '#FFFFFF88',
-      padding: { x: 16, y: 8 }
+      fontSize: '18px', color: '#8D6E63', backgroundColor: '#FFFFFF88',
+      padding: { x: 12, y: 6 }
     }).setOrigin(1, 1).setInteractive({ useHandCursor: true })
       .on('pointerdown', () => {
         window.gameLog.summary();
@@ -937,7 +937,7 @@ class GameScene extends Phaser.Scene {
       BOARD_OFFSET_X + (GRID_SIZE * TILE_SIZE)/2,
       BOARD_OFFSET_Y + (GRID_SIZE * TILE_SIZE)/2,
       '🔄 Перемішування...',
-      { fontSize: '60px', color: '#fff', backgroundColor: '#5D4037', padding: { x: 30, y: 18 } }
+      { fontSize: '45px', color: '#fff', backgroundColor: '#5D4037', padding: { x: 22, y: 14 } }
     ).setOrigin(0.5).setDepth(10).setName('reshuffleText');
 
     // Перемішуємо fill-тайли (не випічку)
@@ -1134,30 +1134,30 @@ class GameScene extends Phaser.Scene {
     addObj(this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.6).setDepth(30));
 
     const N = tools.length;
-    addObj(this.add.text(width/2, height/2 - (N === 1 ? 520 : 680), 'Новий інструмент!', {
-      fontSize: '100px', color: '#FFD700', fontStyle: 'bold'
+    addObj(this.add.text(width/2, height/2 - (N === 1 ? 390 : 510), 'Новий інструмент!', {
+      fontSize: '75px', color: '#FFD700', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(31));
 
-    const firstY = N === 1 ? height/2 - 60 : height/2 - 420;
+    const firstY = N === 1 ? height/2 - 45 : height/2 - 315;
     tools.forEach((name, i) => {
-      const y = firstY + i * 470;
+      const y = firstY + i * 350;
       const tileId = TILE[name.toUpperCase()];
-      addObj(this.add.rectangle(width/2, y, 380, 380, 0xFFFFFF, 0.15)
-        .setStrokeStyle(4, 0xFFFFFF).setDepth(31));
-      addObj(this.add.image(width/2, y, name).setDisplaySize(360, 360).setDepth(32));
+      addObj(this.add.rectangle(width/2, y, 285, 285, 0xFFFFFF, 0.15)
+        .setStrokeStyle(3, 0xFFFFFF).setDepth(31));
+      addObj(this.add.image(width/2, y, name).setDisplaySize(270, 270).setDepth(32));
       const desc = tileId === TILE.ROLLINGPIN
         ? '3+ скалки:\nусе борошно → печиво'
         : '3+ лопатки:\nусе печиво → капкейк';
-      addObj(this.add.text(width/2, y + 240, desc, {
-        fontSize: '40px', color: '#fff', align: 'center'
+      addObj(this.add.text(width/2, y + 180, desc, {
+        fontSize: '30px', color: '#fff', align: 'center'
       }).setOrigin(0.5).setDepth(32));
     });
 
-    const btnY = N === 1 ? height/2 + 380 : height/2 + 440;
-    const btn = addObj(this.add.rectangle(width/2, btnY, 660, 162, 0xE67E22)
+    const btnY = N === 1 ? height/2 + 285 : height/2 + 330;
+    const btn = addObj(this.add.rectangle(width/2, btnY, 495, 120, 0xE67E22)
       .setInteractive({ useHandCursor: true }).setDepth(31));
     addObj(this.add.text(width/2, btnY, 'Далі', {
-      fontSize: '66px', color: '#fff', fontStyle: 'bold'
+      fontSize: '50px', color: '#fff', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(32));
     btn.on('pointerdown', () => {
       objs.forEach(o => o.destroy());
@@ -1171,21 +1171,21 @@ class GameScene extends Phaser.Scene {
     const addObj = (o) => { objs.push(o); return o; };
 
     addObj(this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.6).setDepth(30));
-    addObj(this.add.text(width/2, height/2 - 440, `Рівень ${this.levelData.level}`, {
-      fontSize: '90px', color: '#FFD700', fontStyle: 'bold'
+    addObj(this.add.text(width/2, height/2 - 330, `Рівень ${this.levelData.level}`, {
+      fontSize: '68px', color: '#FFD700', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(31));
-    addObj(this.add.image(width/2, height/2 - 180, 'cake').setDisplaySize(420, 420).setDepth(31));
-    addObj(this.add.text(width/2, height/2 + 100, `Спечіть ${this.targetCount} 🎂`, {
-      fontSize: '108px', color: '#fff', fontStyle: 'bold'
+    addObj(this.add.image(width/2, height/2 - 135, 'cake').setDisplaySize(315, 315).setDepth(31));
+    addObj(this.add.text(width/2, height/2 + 75, `Спечіть ${this.targetCount} 🎂`, {
+      fontSize: '80px', color: '#fff', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(31));
-    addObj(this.add.text(width/2, height/2 + 230, 'Збирайте інгредієнти та складайте комбінації', {
-      fontSize: '48px', color: '#ddd'
+    addObj(this.add.text(width/2, height/2 + 170, 'Збирайте інгредієнти та складайте комбінації', {
+      fontSize: '36px', color: '#ddd'
     }).setOrigin(0.5).setDepth(31));
 
-    const btn = addObj(this.add.rectangle(width/2, height/2 + 380, 660, 162, 0x4CAF50)
+    const btn = addObj(this.add.rectangle(width/2, height/2 + 285, 495, 120, 0x4CAF50)
       .setInteractive({ useHandCursor: true }).setDepth(31));
-    addObj(this.add.text(width/2, height/2 + 380, 'Почати', {
-      fontSize: '66px', color: '#fff', fontStyle: 'bold'
+    addObj(this.add.text(width/2, height/2 + 285, 'Почати', {
+      fontSize: '50px', color: '#fff', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(32));
     btn.on('pointerdown', () => {
       objs.forEach(o => o.destroy());
@@ -1205,7 +1205,7 @@ class GameScene extends Phaser.Scene {
       this.cameras.main.width / 2,
       BOARD_OFFSET_Y + 40,
       msg,
-      { fontSize: '54px', color: '#fff', backgroundColor: '#5D4037', padding: { x: 30, y: 16 } }
+      { fontSize: '40px', color: '#fff', backgroundColor: '#5D4037', padding: { x: 22, y: 12 } }
     ).setOrigin(0.5).setDepth(20);
     this.tweens.add({
       targets: t, alpha: 0, y: BOARD_OFFSET_Y - 20, duration: 1500, delay: 800,
@@ -1234,11 +1234,11 @@ class GameScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
     this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.6).setDepth(30);
-    this.add.text(width/2, height/2 - 140, '🎉 Level Complete! 🎉', {
-      fontSize: '108px', color: '#FFD700', fontStyle: 'bold'
+    this.add.text(width/2, height/2 - 100, '🎉 Level Complete! 🎉', {
+      fontSize: '80px', color: '#FFD700', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(31);
 
-    const nextBtn = this.add.rectangle(width/2, height/2 + 60, 600, 150, 0x4CAF50)
+    const nextBtn = this.add.rectangle(width/2, height/2 + 100, 450, 112, 0x4CAF50)
       .setInteractive({ useHandCursor: true })
       .setDepth(31)
       .on('pointerdown', () => {
@@ -1248,8 +1248,8 @@ class GameScene extends Phaser.Scene {
           this.scene.start('Menu');
         }
       });
-    this.add.text(width/2, height/2 + 60, this.levelIndex < 9 ? 'Наступний рівень' : 'В меню', {
-      fontSize: '66px', color: '#fff'
+    this.add.text(width/2, height/2 + 100, this.levelIndex < 9 ? 'Наступний рівень' : 'В меню', {
+      fontSize: '50px', color: '#fff'
     }).setOrigin(0.5).setDepth(32);
   }
 
@@ -1274,16 +1274,16 @@ class GameScene extends Phaser.Scene {
 
     const { width, height } = this.cameras.main;
     this.add.rectangle(width/2, height/2, width, height, 0x000000, 0.6).setDepth(30);
-    this.add.text(width/2, height/2 - 140, '⏰ Time\'s Up!', {
-      fontSize: '108px', color: '#FF5252', fontStyle: 'bold'
+    this.add.text(width/2, height/2 - 100, '⏰ Time\'s Up!', {
+      fontSize: '80px', color: '#FF5252', fontStyle: 'bold'
     }).setOrigin(0.5).setDepth(31);
 
-    const retryBtn = this.add.rectangle(width/2, height/2 + 60, 540, 150, 0xE67E22)
+    const retryBtn = this.add.rectangle(width/2, height/2 + 100, 405, 112, 0xE67E22)
       .setInteractive({ useHandCursor: true })
       .setDepth(31)
       .on('pointerdown', () => this.scene.restart({ levelIndex: this.levelIndex }));
-    this.add.text(width/2, height/2 + 60, 'Try Again', {
-      fontSize: '66px', color: '#fff'
+    this.add.text(width/2, height/2 + 100, 'Try Again', {
+      fontSize: '50px', color: '#fff'
     }).setOrigin(0.5).setDepth(32);
   }
 }
@@ -1291,7 +1291,7 @@ class GameScene extends Phaser.Scene {
 const config = {
   type: Phaser.AUTO,
   width: GAME_W,   // 960
-  height: GAME_H,  // ~1936
+  height: GAME_H,  // ~1671
   parent: 'game-container',
   backgroundColor: '#f5e6c8',
   scene: [BootScene, MenuScene, GameScene],
