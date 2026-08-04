@@ -174,8 +174,12 @@ class GameScene extends Phaser.Scene {
     this.cakesCollected = 0;
     this.timer = 120;
     this.timerEvent = null;
+    this.idleEvent = null;
     this.moveCount = 0;
     this.matchCount = 0;
+    this.lastMoveTime = 0;
+    this.hintActive = false;
+    this.hintTiles = [];
     // Лічильники зібраних інгредієнтів (матч BASIC/BONUS)
     this.ingredients = { flour: 0, milk: 0, butter: 0, berries: 0 };
     this.ingredientGoals = { flour: 10, milk: 3, butter: 5, berries: 5 };
@@ -242,9 +246,17 @@ class GameScene extends Phaser.Scene {
 
   startTimer() {
     this.isAnimating = false;
+    this.lastMoveTime = this.time.now;
     this.timerEvent = this.time.addEvent({
       delay: 1000,
       callback: this.tickTimer,
+      callbackScope: this,
+      loop: true
+    });
+    // Підказка, якщо гравець не ходить > 5 сек
+    this.idleEvent = this.time.addEvent({
+      delay: 1000,
+      callback: this.checkIdleHint,
       callbackScope: this,
       loop: true
     });
@@ -471,6 +483,9 @@ class GameScene extends Phaser.Scene {
 
   onPointerDown(pointer) {
     if (this.isAnimating) return;
+
+    this.lastMoveTime = this.time.now;
+    this.hideHint();
 
     // Find which tile was clicked
     let clicked = null;
@@ -899,26 +914,73 @@ class GameScene extends Phaser.Scene {
 
   checkPossibleMoves() {
     // Simple check: if no possible match after any swap, reshuffle
-    let hasMove = false;
-    for (let r = 0; r < GRID_SIZE && !hasMove; r++) {
-      for (let c = 0; c < GRID_SIZE && !hasMove; c++) {
+    if (!this.findHintMove()) {
+      this.autoReshuffle();
+    }
+  }
+
+  /** Перший-ліпший своп, що дає матч; повертає {r1,c1,r2,c2} або null */
+  findHintMove() {
+    for (let r = 0; r < GRID_SIZE; r++) {
+      for (let c = 0; c < GRID_SIZE; c++) {
         // Try right
         if (c + 1 < GRID_SIZE) {
           this.swapData(r, c, r, c + 1);
-          if (this.findAllMatches().length > 0) hasMove = true;
+          if (this.findAllMatches().length > 0) {
+            this.swapData(r, c, r, c + 1); // revert
+            return { r1: r, c1: c, r2: r, c2: c + 1 };
+          }
           this.swapData(r, c, r, c + 1); // revert
         }
         // Try down
         if (r + 1 < GRID_SIZE) {
           this.swapData(r, c, r + 1, c);
-          if (this.findAllMatches().length > 0) hasMove = true;
-          this.swapData(r, c, r + 1, c);
+          if (this.findAllMatches().length > 0) {
+            this.swapData(r, c, r + 1, c); // revert
+            return { r1: r, c1: c, r2: r + 1, c2: c };
+          }
+          this.swapData(r, c, r + 1, c); // revert
         }
       }
     }
-    if (!hasMove) {
-      this.autoReshuffle();
+    return null;
+  }
+
+  /** Підказка при простої > 5 сек: підсвічуємо пару тайлів для ходу */
+  checkIdleHint() {
+    if (this.isAnimating || this.hintActive) return;
+    if (this.time.now - this.lastMoveTime > 5000) {
+      this.showHint();
     }
+  }
+
+  showHint() {
+    const mv = this.findHintMove();
+    if (!mv) {
+      this.checkPossibleMoves();
+      return;
+    }
+    const a = this.tiles[mv.r1][mv.c1];
+    const b = this.tiles[mv.r2][mv.c2];
+    if (!a || !b) return;
+    this.hintActive = true;
+    this.hintTiles = [a, b];
+    a.glow.setFillStyle(0xFFEB3B, 0.85);
+    b.glow.setFillStyle(0xFFEB3B, 0.85);
+    a.sprite.setScale(1.08);
+    b.sprite.setScale(1.08);
+    this.showToast('💡 Підказка: міняйте місцями жовті тайли!');
+    window.gameLog.log('hint', { timer: this.timer });
+  }
+
+  hideHint() {
+    if (!this.hintActive) return;
+    this.hintActive = false;
+    this.hintTiles.forEach(t => {
+      if (t.glow) t.glow.setFillStyle(0xFFFFFF, 0.25);
+      if (t.sprite) t.sprite.setScale(1);
+    });
+    this.hintTiles = [];
   }
 
   swapData(r1, c1, r2, c2) {
