@@ -28,7 +28,7 @@ Cozy Match-3 RPG (MVP). Web-гра на **Phaser 3** + HTML5 Canvas.
 |-----|------------|-------------|
 | Presentation | Phaser 3 (Canvas/WebGL) | Рендер, input, tweens |
 | Game logic | Vanilla JS у `game.js` | Match-3, ланцюжок, інструменти, HUD |
-| Data | `levels.json` | Конфіг 10 рівнів |
+| Data | `levels.json` | Конфіг 53 рівнів |
 | Assets | PNG 128×128 + bg.jpg | Тайли, персонажі (bg лише в Menu) |
 | Dev server | `server.py` | Локальна роздача + no-cache |
 
@@ -40,7 +40,7 @@ Cozy Match-3 RPG (MVP). Web-гра на **Phaser 3** + HTML5 Canvas.
 game/
 ├── index.html
 ├── game.js                 # уся логіка
-├── levels.json             # 10 рівнів
+├── levels.json             # 53 рівні
 ├── server.py
 ├── architecture.md
 └── assets/
@@ -357,7 +357,7 @@ python3 server.py
 1. Немає tween-падіння по клітинках (миттєвий `drawGrid` після гравітації).
 2. Немає звуку / частинок (іскри — текстура-частинки, без аудіо).
 3. Монолітний `game.js` — при рості розбити на модулі.
-4. `levels.json` зараз містить тестові рівні механік (0–6); фінальні 53 рівні — завдання data-розробника за `TZ_LEVELS.md`.
+4. `levels.json` містить 53 фінальні рівні (вал. 0 помилок).
 
 ---
 
@@ -369,7 +369,7 @@ python3 server.py
 | B | Win-умови за `target_type` (coffee/guests/combo/layered/clear) | ✅ |
 | C | `tile_weights`, `allowed_helpers`, `moves_limit`, `name` | ✅ |
 | D | `obstacles[].count` (випадкова розкладка без накладок) | ✅ |
-| E | 53 рівні від data-розробника + `validate_levels.js` | ⏳ |
+| E | 53 рівні від data-розробника + `validate_levels.js` | ✅ |
 | F | Tween-гравітація, juice, звук | ○ |
 | G | ES modules / atlas | ○ |
 

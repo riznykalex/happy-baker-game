@@ -1,121 +1,2166 @@
 [
   {
-    "level": 0,
-    "name": "Тестовий полігон",
-    "timer_seconds": 120,
+    "level": 1,
+    "name": "Перше борошно",
+    "timer_seconds": 150,
     "moves_limit": null,
     "target_type": "cakes",
     "target_count": 3,
-    "obstacles": [
-      { "type": "ice", "cells": [[2,2],[3,3],[2,4]] },
-      { "type": "box", "cells": [[1,5],[4,1],[4,5]] },
-      { "type": "burnt", "cells": [[3,1],[1,1],[5,5]] }
-    ],
-    "tools": ["rollingpin", "spatula"],
+    "tile_weights": {
+      "flour": 0.2,
+      "milk": 0.2,
+      "spice": 0.18,
+      "butter": 0.18,
+      "coffee": 0.08,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [],
     "berry_type": "strawberry",
-    "ingredient_goals": { "flour": 10, "milk": 3, "butter": 5, "berries": 5 },
-    "description": "Тестовий рівень 0: лід, коробки і пригорілі"
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 6,
+      "milk": 6,
+      "butter": 5,
+      "berries": 3
+    },
+    "description": "Спечи перші торти й освой основи матчів."
   },
   {
-    "level": 1,
+    "level": 2,
+    "name": "Урок скалки",
+    "timer_seconds": 150,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 3,
+    "tile_weights": {
+      "flour": 0.2,
+      "milk": 0.2,
+      "spice": 0.18,
+      "butter": 0.18,
+      "coffee": 0.08,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [
+      "rollingpin"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 6,
+      "milk": 6,
+      "butter": 5,
+      "berries": 3
+    },
+    "description": "Знайомство зі скалкою — потужним інструментом."
+  },
+  {
+    "level": 3,
+    "name": "Урок лопатки",
+    "timer_seconds": 150,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 4,
+    "tile_weights": {
+      "flour": 0.2,
+      "milk": 0.2,
+      "spice": 0.18,
+      "butter": 0.18,
+      "coffee": 0.08,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 8,
+      "milk": 8,
+      "butter": 6,
+      "berries": 4
+    },
+    "description": "Знайомство з лопаткою на додачу до скалки."
+  },
+  {
+    "level": 4,
+    "name": "Ягідний сад",
+    "timer_seconds": 150,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 4,
+    "tile_weights": {
+      "flour": 0.2,
+      "milk": 0.2,
+      "spice": 0.18,
+      "butter": 0.18,
+      "coffee": 0.08,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 8,
+      "milk": 8,
+      "butter": 6,
+      "berries": 8
+    },
+    "description": "Збери 8 ягід полуниці дорогою до 4 тортів."
+  },
+  {
+    "level": 5,
+    "name": "Перша перевірка",
+    "timer_seconds": 150,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 5,
+    "tile_weights": {
+      "flour": 0.2,
+      "milk": 0.2,
+      "spice": 0.18,
+      "butter": 0.18,
+      "coffee": 0.08,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 10,
+      "milk": 10,
+      "butter": 8,
+      "berries": 5
+    },
+    "description": "Перша комплексна перевірка навичок хвилі 1."
+  },
+  {
+    "level": 6,
+    "name": "Молочний день",
+    "timer_seconds": 140,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 5,
+    "tile_weights": {
+      "flour": 0.18,
+      "milk": 0.24,
+      "spice": 0.17,
+      "butter": 0.17,
+      "coffee": 0.08,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 10,
+      "milk": 12,
+      "butter": 8,
+      "berries": 5
+    },
+    "description": "Молочний акцент: збери 12 молока по дорозі до тортів."
+  },
+  {
+    "level": 7,
+    "name": "Спекотний ранок",
+    "timer_seconds": 140,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 6,
+    "tile_weights": {
+      "flour": 0.2,
+      "milk": 0.2,
+      "spice": 0.18,
+      "butter": 0.18,
+      "coffee": 0.08,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 12,
+      "milk": 12,
+      "butter": 9,
+      "berries": 6
+    },
+    "description": "Рівномірний ритм без перешкод — розігрів перед хвилею перешкод."
+  },
+  {
+    "level": 8,
+    "name": "Дві ложки цукру",
+    "timer_seconds": 140,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 6,
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.19,
+      "spice": 0.17,
+      "butter": 0.17,
+      "coffee": 0.14,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 12,
+      "milk": 12,
+      "butter": 9,
+      "berries": 6
+    },
+    "description": "Акцент кави на дошці — готуємось до майбутньої win-умови coffee."
+  },
+  {
+    "level": 9,
+    "name": "Пригоріла партія",
+    "timer_seconds": 140,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 6,
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.2,
+      "milk": 0.2,
+      "spice": 0.18,
+      "butter": 0.18,
+      "coffee": 0.08,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 12,
+      "milk": 12,
+      "butter": 9,
+      "berries": 6
+    },
+    "description": "Дебют перешкод: перші пригорілі тайли на дошці."
+  },
+  {
+    "level": 10,
+    "name": "Кінець зміни",
+    "timer_seconds": 140,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 7,
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.2,
+      "milk": 0.2,
+      "spice": 0.18,
+      "butter": 0.18,
+      "coffee": 0.08,
+      "rollingpin": 0.04,
+      "spatula": 0.04,
+      "strawberry": 0.04,
+      "blueberry": 0.04
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 14,
+      "milk": 14,
+      "butter": 11,
+      "berries": 7
+    },
+    "description": "Матчі та чистка пригорілих — підсумок хвилі 2."
+  },
+  {
+    "level": 11,
+    "name": "Велике замовлення",
+    "timer_seconds": 130,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 7,
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 2
+      },
+      {
+        "type": "ice",
+        "count": 1
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 14,
+      "milk": 14,
+      "butter": 11,
+      "berries": 7
+    },
+    "description": "Дебют льоду поруч із пригорілими тайлами."
+  },
+  {
+    "level": 12,
+    "name": "Розморозка ягід",
+    "timer_seconds": 130,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 7,
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 1
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.05,
+      "blueberry": 0.11
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "blueberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 14,
+      "milk": 14,
+      "butter": 11,
+      "berries": 7
+    },
+    "description": "Лохина у цілі замість полуниці."
+  },
+  {
+    "level": 13,
+    "name": "Пекельні духовки",
+    "timer_seconds": 130,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 8,
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 4
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 16,
+      "milk": 16,
+      "butter": 12,
+      "berries": 8
+    },
+    "description": "Стрес-тест на пригорілих тайлах."
+  },
+  {
+    "level": 14,
+    "name": "Ягідна феєрія",
+    "timer_seconds": 130,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 8,
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 16,
+      "milk": 16,
+      "butter": 12,
+      "berries": 10
+    },
+    "description": "Легкий подих без перешкод, акцент на ягодах."
+  },
+  {
+    "level": 15,
+    "name": "Морозний ранок",
+    "timer_seconds": 130,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 9,
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 18,
+      "milk": 18,
+      "butter": 14,
+      "berries": 9
+    },
+    "description": "Лід стає регулярним елементом хвилі 3."
+  },
+  {
+    "level": 16,
+    "name": "Велика розморозка",
+    "timer_seconds": 130,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 9,
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 4
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 18,
+      "milk": 18,
+      "butter": 14,
+      "berries": 9
+    },
+    "description": "Лід у масі — перевірка навички розморожування."
+  },
+  {
+    "level": 17,
+    "name": "Підморожений склад",
+    "timer_seconds": 130,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 10,
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 3
+      },
+      {
+        "type": "burnt",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 20,
+      "milk": 20,
+      "butter": 15,
+      "berries": 10
+    },
+    "description": "Лід і пригоріле разом."
+  },
+  {
+    "level": 18,
     "name": "Кавовий спринт",
-    "timer_seconds": 120,
+    "timer_seconds": 125,
     "moves_limit": null,
     "target_type": "coffee",
     "target_count": 8,
     "tile_weights": {
-      "flour": 0.14, "milk": 0.14, "spice": 0.12, "butter": 0.12,
-      "coffee": 0.20, "rollingpin": 0.06, "spatula": 0.06,
-      "strawberry": 0.08, "blueberry": 0.08
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
     },
-    "tools": ["rollingpin", "spatula"],
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
     "berry_type": "strawberry",
-    "allowed_helpers": ["owl", "fox", "dragon"],
-    "description": "Тест win-умови coffee: збери 8 чашок кави"
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "description": "Дебют win-умови coffee: збери 8 чашок кави."
   },
   {
-    "level": 2,
+    "level": 19,
+    "name": "Складна випічка",
+    "timer_seconds": 125,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 10,
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 2
+      },
+      {
+        "type": "burnt",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 20,
+      "milk": 20,
+      "butter": 15,
+      "berries": 10
+    },
+    "description": "Комбінація типів перешкод."
+  },
+  {
+    "level": 20,
+    "name": "Гості на порозі",
+    "timer_seconds": 125,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 11,
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 4
+      },
+      {
+        "type": "burnt",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 22,
+      "milk": 22,
+      "butter": 17,
+      "berries": 11
+    },
+    "description": "Підсумок хвилі 4."
+  },
+  {
+    "level": 21,
+    "name": "Секретні скрині",
+    "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 10,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 2
+      },
+      {
+        "type": "ice",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 20,
+      "milk": 20,
+      "butter": 15,
+      "berries": 10
+    },
+    "description": "Дебют коробок на дошці."
+  },
+  {
+    "level": 22,
+    "name": "Дві духовки",
+    "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 12,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 2
+      },
+      {
+        "type": "burnt",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 24,
+      "milk": 24,
+      "butter": 18,
+      "berries": 12
+    },
+    "description": "Коробки у бою разом із пригорілими."
+  },
+  {
+    "level": 23,
     "name": "Молочна ріка",
     "timer_seconds": 120,
     "moves_limit": null,
     "target_type": "guests",
-    "target_details": { "milk": 15, "flour": 12 },
-    "tile_weights": {
-      "flour": 0.18, "milk": 0.20, "spice": 0.12, "butter": 0.12,
-      "coffee": 0.08, "rollingpin": 0.06, "spatula": 0.06,
-      "strawberry": 0.09, "blueberry": 0.09
+    "target_details": {
+      "milk": 20,
+      "flour": 15
     },
-    "tools": ["rollingpin", "spatula"],
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
     "berry_type": "strawberry",
-    "allowed_helpers": ["owl", "fox"],
-    "description": "Тест win-умови guests + обмеження помічників (без дракончика)"
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "description": "Дебют win-умови guests: молоко та борошно для гостей."
   },
   {
-    "level": 3,
+    "level": 24,
+    "name": "Пряний базар",
+    "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "guests",
+    "target_details": {
+      "spice": 18,
+      "flour": 15
+    },
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.15,
+      "milk": 0.16,
+      "spice": 0.19,
+      "butter": 0.14,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "description": "Акцент спецій на дошці."
+  },
+  {
+    "level": 25,
+    "name": "Пекарська майстерня",
+    "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 12,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 3
+      },
+      {
+        "type": "ice",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.17,
+      "milk": 0.17,
+      "spice": 0.15,
+      "butter": 0.15,
+      "coffee": 0.1,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.08,
+      "blueberry": 0.08
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox",
+      "dragon"
+    ],
+    "ingredient_goals": {
+      "flour": 24,
+      "milk": 24,
+      "butter": 18,
+      "berries": 12
+    },
+    "description": "Підсумок хвилі 5."
+  },
+  {
+    "level": 26,
     "name": "Десертний набір",
     "timer_seconds": 120,
     "moves_limit": null,
     "target_type": "combo_target",
-    "target_details": { "cakes": 4, "cupcakes": 6 },
-    "tile_weights": {
-      "flour": 0.15, "milk": 0.15, "spice": 0.13, "butter": 0.13,
-      "coffee": 0.10, "rollingpin": 0.07, "spatula": 0.07,
-      "strawberry": 0.10, "blueberry": 0.10
+    "target_details": {
+      "cakes": 8,
+      "cupcakes": 5
     },
-    "tools": ["rollingpin", "spatula"],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
     "berry_type": "strawberry",
-    "allowed_helpers": ["owl", "fox", "dragon"],
-    "description": "Тест combo_target: 4 торти + 6 капкейків"
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Дебют win-умови combo_target: торти і капкейки разом."
   },
   {
-    "level": 4,
-    "name": "Весільний заказ",
+    "level": 27,
+    "name": "Святковий стіл",
     "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": {
+      "cakes": 8,
+      "cupcakes": 6
+    },
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Комбо-ціль плюс лід."
+  },
+  {
+    "level": 28,
+    "name": "Торти із залишків",
+    "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 12,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 2
+      },
+      {
+        "type": "ice",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "ingredient_goals": {
+      "flour": 24,
+      "milk": 24,
+      "butter": 18,
+      "berries": 12
+    },
+    "description": "Класика у середньому ритмі."
+  },
+  {
+    "level": 29,
+    "name": "Ягідне асорті",
+    "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": {
+      "cakes": 9,
+      "cupcakes": 6
+    },
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Обмеження помічників: дракончик відпочиває."
+  },
+  {
+    "level": 30,
+    "name": "Банкет для знаті",
+    "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": {
+      "cakes": 10,
+      "cupcakes": 8
+    },
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 2
+      },
+      {
+        "type": "ice",
+        "count": 3
+      },
+      {
+        "type": "burnt",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Три типи перешкод одночасно."
+  },
+  {
+    "level": 31,
+    "name": "Весільний заказ",
+    "timer_seconds": 110,
     "moves_limit": null,
     "target_type": "layered_cake",
     "target_count": 2,
-    "target_details": { "cupcakes_needed": 3 },
-    "tile_weights": {
-      "flour": 0.15, "milk": 0.15, "spice": 0.13, "butter": 0.13,
-      "coffee": 0.10, "rollingpin": 0.07, "spatula": 0.07,
-      "strawberry": 0.10, "blueberry": 0.10
+    "target_details": {
+      "cupcakes_needed": 3
     },
-    "tools": ["rollingpin", "spatula"],
-    "berry_type": "strawberry",
-    "allowed_helpers": ["owl", "fox", "dragon"],
-    "description": "Тест layered_cake: 3 капкейки → 1 багатоярусний торт, треба 2"
-  },
-  {
-    "level": 5,
-    "name": "Прибирання кухні",
-    "timer_seconds": 120,
-    "moves_limit": null,
-    "target_type": "clear_obstacles",
-    "target_details": { "burnt": 3, "ice": 2 },
     "obstacles": [
-      { "type": "burnt", "count": 3 },
-      { "type": "ice", "count": 2 }
+      {
+        "type": "ice",
+        "count": 2
+      }
     ],
     "tile_weights": {
-      "flour": 0.16, "milk": 0.16, "spice": 0.14, "butter": 0.14,
-      "coffee": 0.08, "rollingpin": 0.06, "spatula": 0.06,
-      "strawberry": 0.10, "blueberry": 0.10
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
     },
-    "tools": ["rollingpin", "spatula"],
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
     "berry_type": "strawberry",
-    "allowed_helpers": ["owl", "fox", "dragon"],
-    "description": "Тест clear_obstacles + випадкова розкладка count: прибери 3 пригорілих і 2 льоди"
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Дебют win-умови layered_cake: багатоярусні торти з капкейків."
   },
   {
-    "level": 6,
-    "name": "Майстерність ходів",
-    "timer_seconds": 120,
-    "moves_limit": 25,
-    "target_type": "cakes",
-    "target_count": 4,
-    "tools": ["rollingpin", "spatula"],
+    "level": 32,
+    "name": "Три яруси",
+    "timer_seconds": 110,
+    "moves_limit": null,
+    "target_type": "layered_cake",
+    "target_count": 3,
+    "target_details": {
+      "cupcakes_needed": 3
+    },
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
     "berry_type": "strawberry",
-    "allowed_helpers": ["owl", "fox", "dragon"],
-    "description": "Тест режиму «за ходи»: спечи 4 торти за 25 ходів"
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Більше складань багатоярусних тортів."
+  },
+  {
+    "level": 33,
+    "name": "Ювілей пекарні",
+    "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 14,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 3
+      },
+      {
+        "type": "ice",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "ingredient_goals": {
+      "flour": 28,
+      "milk": 28,
+      "butter": 21,
+      "berries": 14
+    },
+    "description": "Залишається лише сова-помічниця."
+  },
+  {
+    "level": 34,
+    "name": "Медовий місяць",
+    "timer_seconds": 110,
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": {
+      "cakes": 9,
+      "cupcakes": 9
+    },
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 3
+      },
+      {
+        "type": "burnt",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Комбо-ціль на льоду."
+  },
+  {
+    "level": 35,
+    "name": "Королівське весілля",
+    "timer_seconds": 120,
+    "moves_limit": null,
+    "target_type": "layered_cake",
+    "target_count": 4,
+    "target_details": {
+      "cupcakes_needed": 3
+    },
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 2
+      },
+      {
+        "type": "ice",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Підсумок хвилі 7."
+  },
+  {
+    "level": 36,
+    "name": "Камера зберігання",
+    "timer_seconds": 110,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 14,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 4
+      },
+      {
+        "type": "ice",
+        "count": 4
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.12,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "ingredient_goals": {
+      "flour": 28,
+      "milk": 28,
+      "butter": 21,
+      "berries": 14
+    },
+    "description": "Дефолтний розподіл тайлів, багато коробок і льоду."
+  },
+  {
+    "level": 37,
+    "name": "Морозильний цех",
+    "timer_seconds": 110,
+    "moves_limit": null,
+    "target_type": "coffee",
+    "target_count": 10,
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 6
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.14,
+      "spice": 0.13,
+      "butter": 0.13,
+      "coffee": 0.13,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Легкий акцент кави, багато льоду."
+  },
+  {
+    "level": 38,
+    "name": "Кухня без пауз",
+    "timer_seconds": 105,
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": {
+      "cakes": 10,
+      "cupcakes": 10
+    },
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 4
+      },
+      {
+        "type": "ice",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.13,
+      "spice": 0.18,
+      "butter": 0.12,
+      "coffee": 0.11,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.09,
+      "blueberry": 0.11
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "description": "Акцент спецій у комбо-рівні."
+  },
+  {
+    "level": 39,
+    "name": "Кладова барона",
+    "timer_seconds": 105,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 15,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 4
+      },
+      {
+        "type": "burnt",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.2,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.11,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.09,
+      "blueberry": 0.11
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "ingredient_goals": {
+      "flour": 30,
+      "milk": 30,
+      "butter": 23,
+      "berries": 15
+    },
+    "description": "Акцент борошна."
+  },
+  {
+    "level": 40,
+    "name": "Бенкет для двору",
+    "timer_seconds": 100,
+    "moves_limit": null,
+    "target_type": "guests",
+    "target_details": {
+      "milk": 25,
+      "butter": 15
+    },
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 3
+      },
+      {
+        "type": "ice",
+        "count": 3
+      },
+      {
+        "type": "burnt",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.14,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.17,
+      "coffee": 0.11,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.1,
+      "blueberry": 0.11
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl",
+      "fox"
+    ],
+    "description": "Акцент масла, три типи перешкод."
+  },
+  {
+    "level": 41,
+    "name": "Фінал сезону",
+    "timer_seconds": 100,
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": {
+      "cakes": 12,
+      "cupcakes": 12
+    },
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 4
+      },
+      {
+        "type": "ice",
+        "count": 4
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "description": "Важке комбо хвилі 9."
+  },
+  {
+    "level": 42,
+    "name": "Дві доби",
+    "timer_seconds": 100,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 16,
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 5
+      },
+      {
+        "type": "ice",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "ingredient_goals": {
+      "flour": 32,
+      "milk": 32,
+      "butter": 24,
+      "berries": 16
+    },
+    "description": "Довгий марафон пригорілих."
+  },
+  {
+    "level": 43,
+    "name": "Скарбниця короля",
+    "timer_seconds": 95,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 15,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 5
+      },
+      {
+        "type": "burnt",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "ingredient_goals": {
+      "flour": 30,
+      "milk": 30,
+      "butter": 23,
+      "berries": 15
+    },
+    "description": "Коробки щільніше."
+  },
+  {
+    "level": 44,
+    "name": "Пряна магія",
+    "timer_seconds": 95,
+    "moves_limit": null,
+    "target_type": "guests",
+    "target_details": {
+      "spice": 22,
+      "flour": 18
+    },
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 4
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.12,
+      "milk": 0.12,
+      "spice": 0.2,
+      "butter": 0.11,
+      "coffee": 0.13,
+      "rollingpin": 0.05,
+      "spatula": 0.05,
+      "strawberry": 0.1,
+      "blueberry": 0.12
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "description": "Сильний акцент спецій."
+  },
+  {
+    "level": 45,
+    "name": "Остання перевірка",
+    "timer_seconds": 90,
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": {
+      "cakes": 11,
+      "cupcakes": 13
+    },
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 3
+      },
+      {
+        "type": "ice",
+        "count": 4
+      },
+      {
+        "type": "burnt",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "description": "Три типи перешкод плюс комбо-ціль."
+  },
+  {
+    "level": 46,
+    "name": "Високий вогонь",
+    "timer_seconds": 90,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 18,
+    "obstacles": [
+      {
+        "type": "burnt",
+        "count": 6
+      },
+      {
+        "type": "ice",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "ingredient_goals": {
+      "flour": 36,
+      "milk": 36,
+      "butter": 27,
+      "berries": 18
+    },
+    "description": "Стрес-тест на пригорілих тайлах хвилі 10."
+  },
+  {
+    "level": 47,
+    "name": "Глибокий мороз",
+    "timer_seconds": 90,
+    "moves_limit": null,
+    "target_type": "coffee",
+    "target_count": 12,
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 8
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "description": "Лід у масі на win-умові coffee."
+  },
+  {
+    "level": 48,
+    "name": "Скрині шефа",
+    "timer_seconds": 85,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 17,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 6
+      },
+      {
+        "type": "ice",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "ingredient_goals": {
+      "flour": 34,
+      "milk": 34,
+      "butter": 26,
+      "berries": 17
+    },
+    "description": "Коробки щільніше."
+  },
+  {
+    "level": 49,
+    "name": "Вежа десертів",
+    "timer_seconds": 85,
+    "moves_limit": null,
+    "target_type": "layered_cake",
+    "target_count": 5,
+    "target_details": {
+      "cupcakes_needed": 3
+    },
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 3
+      },
+      {
+        "type": "ice",
+        "count": 4
+      },
+      {
+        "type": "burnt",
+        "count": 2
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "description": "Висока вежа багатоярусних тортів."
+  },
+  {
+    "level": 50,
+    "name": "Марафон",
+    "timer_seconds": 80,
+    "moves_limit": null,
+    "target_type": "cakes",
+    "target_count": 20,
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 4
+      },
+      {
+        "type": "ice",
+        "count": 4
+      },
+      {
+        "type": "burnt",
+        "count": 4
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "ingredient_goals": {
+      "flour": 40,
+      "milk": 40,
+      "butter": 30,
+      "berries": 20
+    },
+    "description": "Пік складності основних рівнів."
+  },
+  {
+    "level": 51,
+    "name": "Заморожений зал",
+    "timer_seconds": 90,
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": {
+      "cakes": 10,
+      "cupcakes": 12
+    },
+    "obstacles": [
+      {
+        "type": "ice",
+        "count": 10
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "description": "Бос 1: суцільний лід і важке комбо."
+  },
+  {
+    "level": 52,
+    "name": "Скарби кондитера",
+    "timer_seconds": 90,
+    "moves_limit": null,
+    "target_type": "combo_target",
+    "target_details": {
+      "cakes": 12,
+      "cupcakes": 12
+    },
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 6
+      },
+      {
+        "type": "ice",
+        "count": 3
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "description": "Бос 2: коробки та комбо-ціль."
+  },
+  {
+    "level": 53,
+    "name": "Велике приготування",
+    "timer_seconds": 80,
+    "moves_limit": null,
+    "target_type": "layered_cake",
+    "target_count": 6,
+    "target_details": {
+      "cupcakes_needed": 3
+    },
+    "obstacles": [
+      {
+        "type": "box",
+        "count": 4
+      },
+      {
+        "type": "ice",
+        "count": 5
+      },
+      {
+        "type": "burnt",
+        "count": 4
+      }
+    ],
+    "tile_weights": {
+      "flour": 0.13,
+      "milk": 0.13,
+      "spice": 0.12,
+      "butter": 0.12,
+      "coffee": 0.14,
+      "rollingpin": 0.06,
+      "spatula": 0.06,
+      "strawberry": 0.11,
+      "blueberry": 0.13
+    },
+    "tools": [
+      "rollingpin",
+      "spatula"
+    ],
+    "berry_type": "strawberry",
+    "allowed_helpers": [
+      "owl"
+    ],
+    "description": "Бос 3: фінальна вежа багатоярусних тортів."
   }
 ]
