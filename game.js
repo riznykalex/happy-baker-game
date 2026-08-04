@@ -982,18 +982,23 @@ class GameScene extends Phaser.Scene {
     const y = BOARD_OFFSET_Y + r * TILE_SIZE + TILE_SIZE / 2;
     const d = delay || 0;
 
-    // Pop: пружний стрибок з нуля (без затримки — тайл міг зникнути в каскаді)
-    container.setScale(0);
+    // Pop: тайл пружно виростає на місці (анімуємо спрайт і світло,
+    // вони масштабуються навколо власних центрів — без «прильоту з кута»)
+    const sprite = container.sprite;
+    const glow = container.glow;
+    if (sprite) sprite.setScale(0);
+    if (glow) glow.setScale(0);
     this.tweens.add({
-      targets: container,
+      targets: [sprite, glow],
       scale: 1,
       duration: 200,
       ease: 'Back.easeOut'
     });
 
-    // Сяюче кільце, що розширюється й тане
+    // Кільце-ударна хвиля: розширюється з нуля і тане
     const ring = this.add.circle(x, y, TILE_SIZE * 0.34, 0xFFE066, 0)
       .setStrokeStyle(8, 0xFFD54F, 0.95)
+      .setScale(0)
       .setDepth(15);
     this.tweens.add({
       targets: ring,
