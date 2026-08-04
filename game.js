@@ -83,8 +83,8 @@ const TILE = {
   STRAWBERRY: 4,   // 🍓 Полуниця
   BLUEBERRY: 5,    // 🫐 Лохина
   COFFEE: 6,       // ☕️ Розріджувач (+час)
-  ROLLINGPIN: 7,   // 🥖 Скалка: 4+ → усе борошно → печиво
-  SPATULA: 8,      // 🍳 Лопатка: 4+ → усе печиво → капкейк
+  ROLLINGPIN: 7,   // 🥖 Скалка: 3+ → усе борошно → печиво
+  SPATULA: 8,      // 🍳 Лопатка: 3+ → усе печиво → капкейк
   COOKIE: 9,       // 🍪 Корж / печиво
   CROISSANT: 10,   // 🥐
   CUPCAKE: 11,     // 🧁
@@ -711,7 +711,10 @@ class GameScene extends Phaser.Scene {
       let special = null;
 
       // —— Ланцюжок: BASIC → COOKIE → CROISSANT → CUPCAKE → CAKE ——
-      if (BASIC_TILES.includes(type)) {
+      if (type === TILE.MILK && size >= 4) {
+        spawnType = TILE.BUTTER; // 4+ молока → масло
+        special = 'milk_to_butter';
+      } else if (BASIC_TILES.includes(type)) {
         if (size >= 5) {
           spawnType = TILE.CUPCAKE;
           this.addCharge('owl', 12);

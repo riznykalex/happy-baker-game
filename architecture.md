@@ -128,6 +128,7 @@ BASIC
   Match-3 → COOKIE (корж)
   Match-4 → CROISSANT
   Match-5 → CUPCAKE
+  MILK Match-4+ → BUTTER (масло з молока)
 
 COOKIE
   Match-3 → CROISSANT
