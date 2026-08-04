@@ -8,9 +8,9 @@ const GRID_SIZE = 7;
 const BOARD_W = GRID_SIZE * TILE_SIZE; // 896
 const BOARD_H = GRID_SIZE * TILE_SIZE; // 896
 const BOARD_OFFSET_X = 32;
-const BOARD_OFFSET_Y = 520;     // місце під великий HUD зверху
+const BOARD_OFFSET_Y = 400;     // місце під HUD зверху
 const GAME_W = BOARD_OFFSET_X * 2 + BOARD_W; // 960
-const GAME_H = BOARD_OFFSET_Y + BOARD_H + 255; // ~1671 (хелпери знизу)
+const GAME_H = BOARD_OFFSET_Y + BOARD_H + 255; // ~1551 (хелпери знизу)
 
 // ──────────────────────────────────────────────
 // Game Logger — для аналізу геймплею та балансу
@@ -256,8 +256,8 @@ class GameScene extends Phaser.Scene {
     const { width, height } = this.cameras.main;
     const g = this.ingredientGoals;
 
-    // Окремий блок HUD (0..500)
-    this.add.rectangle(width/2, 250, width - 16, 500, 0xFFFFFF, 0.95)
+    // Окремий блок HUD (0..400)
+    this.add.rectangle(width/2, 200, width - 16, 400, 0xFFFFFF, 0.95)
       .setStrokeStyle(5, 0xD7CCC8);
 
     // Рядок 1: рівень
@@ -275,25 +275,23 @@ class GameScene extends Phaser.Scene {
       fontSize: '64px', color: '#C62828', fontStyle: 'bold'
     }).setOrigin(0.5, 0);
 
-    // Рядок 4: лічильники інгредієнтів — сітка 2×2 (іконки 108px)
+    // Рядок 4: лічильники інгредієнтів — один рядок 1×4 (іконки 96px)
     const ingItems = [
       { key: 'flour',      tex: 'flour',      field: 'flour' },
       { key: 'milk',       tex: 'milk',       field: 'milk' },
       { key: 'butter',     tex: 'butter',     field: 'butter' },
       { key: 'berries',    tex: 'strawberry', field: 'berries' }
     ];
-    const colX = [240, 720];
-    const rowY = [250, 390];
+    const colX = [144, 368, 592, 816];
     this.ingTexts = {};
     this.ingIcons = {};
     ingItems.forEach((item, i) => {
-      const x = colX[i % 2];
-      const y = rowY[Math.floor(i / 2)];
-      const icon = this.add.image(x, y, item.tex).setDisplaySize(108, 108);
+      const x = colX[i];
+      const icon = this.add.image(x, 250, item.tex).setDisplaySize(96, 96);
       this.ingIcons[item.field] = icon;
-      this.ingTexts[item.field] = this.add.text(x, y + 75,
+      this.ingTexts[item.field] = this.add.text(x, 316,
         `${this.ingredients[item.field]}/${g[item.field]}`,
-        { fontSize: '54px', color: '#6D4C41', fontStyle: 'bold' }
+        { fontSize: '48px', color: '#6D4C41', fontStyle: 'bold' }
       ).setOrigin(0.5);
     });
 
@@ -1291,7 +1289,7 @@ class GameScene extends Phaser.Scene {
 const config = {
   type: Phaser.AUTO,
   width: GAME_W,   // 960
-  height: GAME_H,  // ~1671
+  height: GAME_H,  // ~1551
   parent: 'game-container',
   backgroundColor: '#f5e6c8',
   scene: [BootScene, MenuScene, GameScene],
