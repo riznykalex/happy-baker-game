@@ -722,7 +722,10 @@ class GameScene extends Phaser.Scene {
         special = 'spatula_convert';
       }
 
-      if (cakesGained > 0) this.cakesCollected += cakesGained;
+      if (cakesGained > 0) {
+        this.cakesCollected += cakesGained;
+        this.onCakeGained(cakesGained);
+      }
 
       this.matchCount++;
       window.gameLog.log('match', {
@@ -1010,6 +1013,7 @@ class GameScene extends Phaser.Scene {
             this.grid[r][c] = TILE.CAKE;
             this.cakesCollected++;
             this.updateTargetUI();
+            this.onCakeGained(1);
             this.drawGrid();
             found = true;
             this.showToast('🐉 Капкейк → Торт!');
@@ -1078,6 +1082,7 @@ class GameScene extends Phaser.Scene {
         cake.destroy();
         this.cakesCollected++;
         this.updateTargetUI();
+        this.onCakeGained(1);
         this.tweens.add({ targets: target, scale: 1.3, duration: 120, yoyo: true });
         this.showToast('🎂 Інгредієнти зібрано! +1 торт');
         this.resetIngredients();
@@ -1090,6 +1095,19 @@ class GameScene extends Phaser.Scene {
     this.ingredients = { flour: 0, milk: 0, butter: 0, berries: 0 };
     this.allIngredientsComplete = false;
     this.updateIngredientsUI();
+  }
+
+  /** Кожен спечений торт → повний перезапуск таймера */
+  onCakeGained(count) {
+    this.timer = this.levelData.timer_seconds;
+    this.timerText.setText(`⏱ ${this.formatTime(this.timer)}`);
+    this.timerText.setColor(this.timer <= 10 ? '#FF1744' : '#C62828');
+    window.gameLog.log('timer_reset', {
+      count,
+      cakesNow: this.cakesCollected,
+      resetTo: this.timer
+    });
+    this.showToast('⏱ Час оновлено!');
   }
 
   // ──────────────────────────────────────────────
