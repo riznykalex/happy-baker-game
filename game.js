@@ -120,7 +120,7 @@ class BootScene extends Phaser.Scene {
   constructor() { super('Boot'); }
   preload() {
     this.load.image('bg', 'assets/bg.jpg');
-    this.load.image('sprites', 'assets/sprites.png');
+    this.load.spritesheet('obstacles', 'assets/sprites.png', { frameWidth: 128, frameHeight: 128 });
     this.load.json('levels', 'levels.json');
 
     const tiles = [
@@ -190,6 +190,10 @@ class GameScene extends Phaser.Scene {
     this.ingredientGoals = { flour: 10, milk: 3, butter: 5, berries: 5 };
     this.allIngredientsComplete = false;
     this.allowedTools = [];
+    // Перешкоди: лід (поверх тайла), коробки (2 стадії), пригоріле
+    this.iceCells = new Set();    // "r,c" — лід над замороженим тайлом
+    this.boxCells = new Map();    // "r,c" -> хітів лишилось (2 закрита, 1 відкрита)
+    this.burntCells = new Set();  // "r,c" — пригоріле печиво
     this.helpers = {
       owl: { charge: 0, max: 100, name: 'Сова', emoji: '🦉' },
       fox: { charge: 0, max: 100, name: 'Лисичка', emoji: '🦊' },
@@ -250,7 +254,9 @@ class GameScene extends Phaser.Scene {
 
     // Init grid
     this.initGrid();
+    this.placeObstacles();
     this.drawGrid();
+    this.applyGravity(); // перша гравітація навколо перешкод + каскади
 
     // Input
     this.input.on('pointerdown', this.onPointerDown, this);
@@ -450,6 +456,8 @@ class GameScene extends Phaser.Scene {
 
   hasMatchAt(r, c) {
     const t = this.grid[r][c];
+    // Заморожені льодом тайли не беруть участь у матчах
+    if (this.iceCells.has(`${r},${c}`)) return false;
     // Усі тайли, що можуть з'явитись з random fill
     const ok = BASIC_TILES.includes(t) || BONUS_TILES.includes(t) || FILLER_TILES.includes(t);
     if (!ok) return false;
@@ -465,6 +473,53 @@ class GameScene extends Phaser.Scene {
     return count >= 3;
   }
 
+  /** Розміщує перешкоди рівня з конфігу levels.json */
+  placeObstacles() {
+    (this.levelData.obstacles || []).forEach(o => {
+      (o.cells || []).forEach(([r, c]) => {
+        if (r < 0 || r >= GRID_SIZE || c < 0 || c >= GRID_SIZE) return;
+        const key = `${r},${c}`;
+        if (o.type === 'ice') {
+          if (this.grid[r][c] !== TILE.EMPTY) this.iceCells.add(key);
+        } else if (o.type === 'box') {
+          this.grid[r][c] = TILE.EMPTY;
+          this.boxCells.set(key, 2); // 2 хіти: закрита → відкрита → капкейк
+        } else if (o.type === 'burnt') {
+          this.grid[r][c] = TILE.EMPTY;
+          this.burntCells.add(key);
+        }
+      });
+    });
+    window.gameLog.log('obstacles', {
+      ice: this.iceCells.size,
+      box: this.boxCells.size,
+      burnt: this.burntCells.size
+    });
+  }
+
+  /** Чи клітинка зайнята перешкодою (не свапається, не рухається гравітацією) */
+  isBlocked(r, c) {
+    const key = `${r},${c}`;
+    return this.iceCells.has(key) || this.boxCells.has(key) || this.burntCells.has(key);
+  }
+
+  /** Спалах іскор у точці (фідбек зламу перешкоди) */
+  burstAt(x, y, count) {
+    const emitter = this.add.particles(x, y, 'spark', {
+      speed: { min: 40, max: 170 },
+      angle: { min: 0, max: 360 },
+      scale: { start: 0.9, end: 0 },
+      alpha: { start: 1, end: 0 },
+      lifespan: 450,
+      emitting: false,
+      blendMode: Phaser.BlendModes.ADD
+    }).setDepth(15);
+    emitter.explode(count || 6);
+    this.time.delayedCall(600, () => {
+      if (!emitter.destroyed) emitter.destroy();
+    });
+  }
+
   drawGrid() {
     // Clear old tiles
     this.tiles.forEach(row => row.forEach(t => t && t.destroy()));
@@ -473,31 +528,52 @@ class GameScene extends Phaser.Scene {
     for (let r = 0; r < GRID_SIZE; r++) {
       this.tiles[r] = [];
       for (let c = 0; c < GRID_SIZE; c++) {
-        const type = this.grid[r][c];
-        if (type === TILE.EMPTY) {
-          this.tiles[r][c] = null;
-          continue;
-        }
         const x = BOARD_OFFSET_X + c * TILE_SIZE + TILE_SIZE / 2;
         const y = BOARD_OFFSET_Y + r * TILE_SIZE + TILE_SIZE / 2;
+        const type = this.grid[r][c];
+        const key = `${r},${c}`;
 
-        const texKey = TILE_TEXTURE[type] || 'flour';
-        // Оригінальний розмір 128×128 — без setDisplaySize / розтягування
-        const sprite = this.add.image(x, y, texKey)
-          .setInteractive({ useHandCursor: true })
-          .setData('row', r)
-          .setData('col', c)
-          .setData('type', type);
-
+        const children = [];
         // Легке підсвічування під тайлом
         const glow = this.add.circle(x, y, TILE_SIZE / 2 - 4, 0xFFFFFF, 0.25);
+        children.push(glow);
 
-        const container = this.add.container(0, 0, [glow, sprite]);
+        let sprite = null;
+        if (type !== TILE.EMPTY) {
+          const texKey = TILE_TEXTURE[type] || 'flour';
+          // Оригінальний розмір 128×128 — без setDisplaySize / розтягування
+          sprite = this.add.image(x, y, texKey)
+            .setInteractive({ useHandCursor: true })
+            .setData('row', r)
+            .setData('col', c)
+            .setData('type', type);
+          children.push(sprite);
+        }
+
+        // Перешкоди (кадри 16-19 спрайтлиста: лід, закрита/відкрита коробка, пригоріле)
+        let ice = null, box = null, burnt = null;
+        if (this.iceCells.has(key)) {
+          ice = this.add.image(x, y, 'obstacles', 16);
+          children.push(ice);
+        }
+        if (this.boxCells.has(key)) {
+          box = this.add.image(x, y, 'obstacles', this.boxCells.get(key) === 1 ? 18 : 17);
+          children.push(box);
+        }
+        if (this.burntCells.has(key)) {
+          burnt = this.add.image(x, y, 'obstacles', 19);
+          children.push(burnt);
+        }
+
+        const container = this.add.container(0, 0, children);
         container.setData('row', r);
         container.setData('col', c);
         container.setData('type', type);
         container.sprite = sprite;
         container.glow = glow;
+        container.ice = ice;
+        container.box = box;
+        container.burnt = burnt;
 
         this.tiles[r][c] = container;
       }
@@ -515,7 +591,7 @@ class GameScene extends Phaser.Scene {
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
         const t = this.tiles[r][c];
-        if (!t) continue;
+        if (!t || !t.sprite) continue; // перешкоди без тайла під ними не клікабельні
         const bounds = t.sprite.getBounds();
         if (bounds.contains(pointer.x, pointer.y)) {
           clicked = { r, c, tile: t };
@@ -525,6 +601,16 @@ class GameScene extends Phaser.Scene {
       if (clicked) break;
     }
     if (!clicked) return;
+
+    // Перешкоду не можна обрати — знімаємо вибір, якщо був
+    if (this.isBlocked(clicked.r, clicked.c)) {
+      if (this.selected) {
+        this.selected.tile.glow.setFillStyle(0xFFFFFF, 0.35);
+        this.selected.tile.sprite.setScale(1);
+        this.selected = null;
+      }
+      return;
+    }
 
     if (!this.selected) {
       this.selected = clicked;
@@ -637,8 +723,9 @@ class GameScene extends Phaser.Scene {
     for (let r = 0; r < GRID_SIZE; r++) {
       let c = 0;
       while (c < GRID_SIZE) {
+        const key = `${r},${c}`;
         const t = this.grid[r][c];
-        if (t < 0) { c++; continue; } // тільки EMPTY пропускаємо
+        if (t < 0 || this.iceCells.has(key)) { c++; continue; } // EMPTY / лід пропускаємо
         let len = 1;
         while (c + len < GRID_SIZE && this.grid[r][c + len] === t) len++;
         if (len >= 3) {
@@ -651,8 +738,9 @@ class GameScene extends Phaser.Scene {
     for (let c = 0; c < GRID_SIZE; c++) {
       let r = 0;
       while (r < GRID_SIZE) {
+        const key = `${r},${c}`;
         const t = this.grid[r][c];
-        if (t < 0) { r++; continue; }
+        if (t < 0 || this.iceCells.has(key)) { r++; continue; }
         let len = 1;
         while (r + len < GRID_SIZE && this.grid[r + len][c] === t) len++;
         if (len >= 3) {
@@ -831,8 +919,48 @@ class GameScene extends Phaser.Scene {
       ease: 'Back.easeIn',
       onComplete: () => {
         toDestroy.forEach(t => t.destroy());
-        // Ставимо spawn-и
+
         const transforms = [];
+        const hitKeys = new Set(); // кожна перешкода отримує максимум 1 хіт за матч
+
+        // Перешкоди поряд з матчем отримують хіт
+        matches.forEach(({ r: mr, c: mc }) => {
+          [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dr, dc]) => {
+            const nr = mr + dr, nc = mc + dc;
+            if (nr < 0 || nr >= GRID_SIZE || nc < 0 || nc >= GRID_SIZE) return;
+            const key = `${nr},${nc}`;
+            if (hitKeys.has(key)) return;
+            const x = BOARD_OFFSET_X + nc * TILE_SIZE + TILE_SIZE / 2;
+            const y = BOARD_OFFSET_Y + nr * TILE_SIZE + TILE_SIZE / 2;
+            if (this.iceCells.has(key)) {
+              hitKeys.add(key);
+              this.iceCells.delete(key);
+              this.burstAt(x, y, 5);
+              window.gameLog.log('obstacle_hit', { type: 'ice', r: nr, c: nc });
+            } else if (this.burntCells.has(key)) {
+              hitKeys.add(key);
+              this.burntCells.delete(key);
+              this.burstAt(x, y, 8);
+              window.gameLog.log('obstacle_hit', { type: 'burnt', r: nr, c: nc });
+            } else if (this.boxCells.has(key)) {
+              hitKeys.add(key);
+              const hits = this.boxCells.get(key) - 1;
+              if (hits <= 0) {
+                this.boxCells.delete(key);
+                this.grid[nr][nc] = TILE.CUPCAKE; // коробка → капкейк (справжній тайл)
+                transforms.push({ r: nr, c: nc });
+                this.burstAt(x, y, 10);
+                window.gameLog.log('obstacle_hit', { type: 'box', stage: 'cupcake', r: nr, c: nc });
+              } else {
+                this.boxCells.set(key, hits);
+                this.burstAt(x, y, 5);
+                window.gameLog.log('obstacle_hit', { type: 'box', stage: hits === 1 ? 'open' : 'closed', r: nr, c: nc });
+              }
+            }
+          });
+        });
+
+        // Ставимо spawn-и
         spawns.forEach(s => {
           if (this.grid[s.r][s.c] === TILE.EMPTY) {
             this.grid[s.r][s.c] = s.type;
@@ -914,13 +1042,18 @@ class GameScene extends Phaser.Scene {
   }
 
   applyGravity() {
-    // Куди опустяться магічні перетворення після гравітації (рахуємо до зміни сітки)
+    // Куди опустяться магічні перетворення після гравітації (до зміни сітки).
+    // Перешкоди ділять колонку на сегменти — тайл падає лише до низу свого сегмента.
     const transforms = (this._pendingTransforms || []).map(t => {
-      let below = 0;
+      let segBottom = GRID_SIZE - 1;
       for (let rr = t.r + 1; rr < GRID_SIZE; rr++) {
+        if (this.isBlocked(rr, t.c)) { segBottom = rr - 1; break; }
+      }
+      let below = 0;
+      for (let rr = t.r + 1; rr <= segBottom; rr++) {
         if (this.grid[rr][t.c] !== TILE.EMPTY) below++;
       }
-      return { r: GRID_SIZE - 1 - below, c: t.c };
+      return { r: segBottom - below, c: t.c };
     });
     this._pendingTransforms = null;
 
@@ -928,6 +1061,10 @@ class GameScene extends Phaser.Scene {
     for (let c = 0; c < GRID_SIZE; c++) {
       let emptyRow = GRID_SIZE - 1;
       for (let r = GRID_SIZE - 1; r >= 0; r--) {
+        if (this.isBlocked(r, c)) {
+          emptyRow = r - 1; // сегмент вище перешкоди
+          continue;
+        }
         if (this.grid[r][c] !== TILE.EMPTY) {
           if (r !== emptyRow) {
             this.grid[emptyRow][c] = this.grid[r][c];
@@ -937,10 +1074,13 @@ class GameScene extends Phaser.Scene {
           emptyRow--;
         }
       }
-      // Fill top with new basic tiles
-      for (let r = emptyRow; r >= 0; r--) {
-        this.grid[r][c] = this.randomBasic();
-        moved = true;
+      // Fill top of each segment (клітинки перешкод пропускаємо)
+      for (let r = 0; r < GRID_SIZE; r++) {
+        if (this.isBlocked(r, c)) continue;
+        if (this.grid[r][c] === TILE.EMPTY) {
+          this.grid[r][c] = this.randomBasic();
+          moved = true;
+        }
       }
     }
 
@@ -1039,8 +1179,9 @@ class GameScene extends Phaser.Scene {
   findHintMove() {
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
+        if (this.grid[r][c] === TILE.EMPTY || this.isBlocked(r, c)) continue;
         // Try right
-        if (c + 1 < GRID_SIZE) {
+        if (c + 1 < GRID_SIZE && this.grid[r][c + 1] !== TILE.EMPTY && !this.isBlocked(r, c + 1)) {
           this.swapData(r, c, r, c + 1);
           if (this.findAllMatches().length > 0) {
             this.swapData(r, c, r, c + 1); // revert
@@ -1049,7 +1190,7 @@ class GameScene extends Phaser.Scene {
           this.swapData(r, c, r, c + 1); // revert
         }
         // Try down
-        if (r + 1 < GRID_SIZE) {
+        if (r + 1 < GRID_SIZE && this.grid[r + 1][c] !== TILE.EMPTY && !this.isBlocked(r + 1, c)) {
           this.swapData(r, c, r + 1, c);
           if (this.findAllMatches().length > 0) {
             this.swapData(r, c, r + 1, c); // revert
@@ -1119,12 +1260,12 @@ class GameScene extends Phaser.Scene {
       { fontSize: '45px', color: '#fff', backgroundColor: '#5D4037', padding: { x: 22, y: 14 } }
     ).setOrigin(0.5).setDepth(10).setName('reshuffleText');
 
-    // Перемішуємо всі комірки включно з випічкою користувача
+    // Перемішуємо всі тайли, але не перешкоди (лід залишається на своєму тайлі)
     const isShuffleable = (t) => t !== TILE.EMPTY;
     const basics = [];
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
-        if (isShuffleable(this.grid[r][c])) {
+        if (isShuffleable(this.grid[r][c]) && !this.iceCells.has(`${r},${c}`)) {
           basics.push(this.grid[r][c]);
         }
       }
@@ -1133,7 +1274,7 @@ class GameScene extends Phaser.Scene {
     let idx = 0;
     for (let r = 0; r < GRID_SIZE; r++) {
       for (let c = 0; c < GRID_SIZE; c++) {
-        if (isShuffleable(this.grid[r][c])) {
+        if (isShuffleable(this.grid[r][c]) && !this.iceCells.has(`${r},${c}`)) {
           this.grid[r][c] = basics[idx++];
         }
       }
@@ -1187,7 +1328,7 @@ class GameScene extends Phaser.Scene {
       let found = false;
       for (let r = 0; r < GRID_SIZE && !found; r++) {
         for (let c = 0; c < GRID_SIZE && !found; c++) {
-          if (this.grid[r][c] === TILE.CUPCAKE) {
+          if (this.grid[r][c] === TILE.CUPCAKE && !this.isBlocked(r, c)) {
             const pos = {
               x: BOARD_OFFSET_X + c * TILE_SIZE + TILE_SIZE / 2,
               y: BOARD_OFFSET_Y + r * TILE_SIZE + TILE_SIZE / 2
